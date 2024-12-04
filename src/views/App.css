@@ -1,0 +1,33 @@
+.home-container {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.home-container ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.home-container li {
+  padding: 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.home-container li h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.home-container li p {
+  font-size: 14px;
+  color: #555;
+}
+
+.error {
+  color: red;
+  margin-top: 10px;
+}
