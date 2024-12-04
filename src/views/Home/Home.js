@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { Layout, Menu, Dropdown, Button, Row, Col, Card } from 'antd';
 import './Home.css'; // Đảm bảo có file CSS tùy chỉnh giao diện
 
+const { Header, Content } = Layout;
+
 const Home = () => {
-    const [posts, setPosts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [classes, setClasses] = useState([]); // Danh sách lớp học
+    const [subjects, setSubjects] = useState([]); // Danh sách môn học
+    const [loadingClasses, setLoadingClasses] = useState(true);
+    const [loadingSubjects, setLoadingSubjects] = useState(false);
+    const [selectedClass, setSelectedClass] = useState(null);
     const [userInfo, setUserInfo] = useState(null);
-    const [showMenu, setShowMenu] = useState(false);
     const navigate = useNavigate();
 
     const token = localStorage.getItem('token'); // Lấy token từ localStorage
@@ -19,7 +23,23 @@ const Home = () => {
             return;
         }
 
-        // Lấy thông tin người dùng từ API
+        // Lấy danh sách các lớp học
+        const fetchClasses = async () => {
+            try {
+                const response = await axios.get('http://localhost:8080/books/class', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setClasses(response.data.value);
+                setLoadingClasses(false);
+            } catch (error) {
+                console.error("Lỗi khi lấy danh sách lớp học", error);
+                setLoadingClasses(false);
+            }
+        };
+
+        fetchClasses();
+
+        // Lấy thông tin người dùng
         const fetchUserInfo = async () => {
             try {
                 const response = await axios.get('http://localhost:8080/books/users/my-info', {
@@ -32,77 +52,79 @@ const Home = () => {
         };
 
         fetchUserInfo();
-
-        // Lấy danh sách bài viết
-        const fetchPosts = async () => {
-            try {
-                const response = await axios.get('http://localhost:8080/books/posts', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setPosts(response.data.value);
-                setLoading(false);
-            } catch (err) {
-                setError('Không thể tải danh sách bài đăng!');
-                setLoading(false);
-            }
-        };
-
-        fetchPosts();
     }, [token, navigate]);
 
-    const handleViewDetails = (id) => {
-        navigate(`/post/${id}`); // Điều hướng đến trang chi tiết bài viết
+    // Lấy danh sách môn học khi lớp học được chọn
+    const fetchSubjects = async (classId) => {
+        setLoadingSubjects(true);
+        try {
+            const response = await axios.get(`http://localhost:8080/books/class/${classId}/subjects`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setSubjects(response.data.value); // Cập nhật môn học
+            setLoadingSubjects(false);
+        } catch (err) {
+            console.error('Lỗi khi lấy môn học:', err);
+            setLoadingSubjects(false);
+        }
     };
 
-    const toggleMenu = () => setShowMenu(!showMenu); // Hiển thị / ẩn menu người dùng
+    const handleClassSelect = (classId) => {
+        setSelectedClass(classId); // Lưu lớp học đã chọn
+        fetchSubjects(classId); // Gửi yêu cầu lấy môn học của lớp đã chọn
+    };
 
-    if (loading) {
-        return <div className="loading">Đang tải...</div>;
-    }
-
-    if (error) {
-        return <div className="error">{error}</div>;
+    if (loadingClasses) {
+        return <div className="loading">Đang tải lớp học...</div>;
     }
 
     return (
-        <div className="home-container">
-            {/* Thanh bar phía trên */}
-            <div className="navbar">
-                <div className="navbar-left">
-                    <h1>Trang chủ</h1>
-                </div>
-                <div className="navbar-right">
-                    <div className="user-info" onClick={toggleMenu}>
-                        <img
-                            src="https://via.placeholder.com/40" // Thay hình người dùng ở đây
-                            alt="User"
-                            className="user-avatar"
-                        />
-                        {showMenu && (
-                            <div className="dropdown-menu">
-                                <button onClick={() => navigate(`/user/${userInfo?.id}`)}>Chi tiết người dùng</button>
-                                <button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }}>Đăng xuất</button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
+        <Layout>
+            <Header className="header">
+                <div className="logo">Trang chủ</div>
+                <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['1']}>
+                    {/* Hiển thị danh sách lớp học trong navbar */}
+                    {classes.map((classItem) => (
+                        <Menu.Item key={classItem.id} onClick={() => handleClassSelect(classItem.id)}>
+                            {classItem.name}
+                        </Menu.Item>
+                    ))}
+                </Menu>
+            </Header>
 
-            {/* Danh sách bài viết */}
-            <div className="posts-list">
-                {posts.map((post) => (
-                    <div className="post-item" key={post.id}>
-                        <h3 className="post-title">{post.title}</h3>
-                        <p className="post-description">{post.description}</p>
-                        <p className="post-author">Tác giả: {post.author}</p>
-                        <p className="post-date">
-                            Ngày tạo: {new Date(post.createAt).toLocaleString()} | Cập nhật: {new Date(post.updateAt).toLocaleString()}
-                        </p>
-                        <button className="view-details-btn" onClick={() => handleViewDetails(post.id)}>Xem chi tiết</button>
-                    </div>
-                ))}
-            </div>
-        </div>
+            <Content style={{ padding: '20px' }}>
+                <div className="home-container">
+                    {/* Hiển thị môn học nếu đã chọn lớp */}
+                    {selectedClass && (
+                        <div className="subjects-container">
+                            <h2>Môn học của lớp {selectedClass}</h2>
+                            <Row gutter={[16, 16]}>
+                                {loadingSubjects ? (
+                                    <div>Đang tải môn học...</div>
+                                ) : (
+                                    subjects.map((subject) => (
+                                        <Col span={8} key={subject.id}>
+                                            <Card
+                                                hoverable
+                                                title={subject.name}
+                                                style={{ marginBottom: '16px' }}
+                                            >
+                                                <Button
+                                                    type="primary"
+                                                    onClick={() => navigate(`/subject/${subject.id}`)}
+                                                >
+                                                    Xem chi tiết
+                                                </Button>
+                                            </Card>
+                                        </Col>
+                                    ))
+                                )}
+                            </Row>
+                        </div>
+                    )}
+                </div>
+            </Content>
+        </Layout>
     );
 };
 
