@@ -1,13 +1,13 @@
-.home-container {
-    padding: 20px;
+/* Home.css */
+.loading {
+    text-align: center;
+    margin-top: 50px;
 }
 
 .header {
-    background-color: #001529;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 20px;
 }
 
 .logo {
@@ -16,19 +16,110 @@
     font-weight: bold;
 }
 
-.subjects-container {
+.avatar {
+    cursor: pointer;
+}
+
+/* Home.css */
+.profile-container {
+    padding: 20px;
+}
+
+.loading {
+    text-align: center;
+    margin-top: 50px;
+}
+
+/* Card */
+.card-title {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.card-content {
+    margin-top: 20px;
+}
+
+.post-list {
     margin-top: 20px;
 }
 
 .ant-card {
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ant-pagination {
+    margin-top: 20px;
+}
+
+.post-list-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.post-list {
+    width: 100%;
+    max-width: 800px;
+    /* Giới hạn chiều rộng của danh sách bài viết */
+    margin: 0 auto;
+}
+
+.ant-card {
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ant-pagination {
+    margin-top: 20px;
+}
+
+/* src/Home.css */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.post-list-container {
+    margin: 0 auto;
+    max-width: 1200px;
+}
+
+.post-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.ant-card {
     border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.ant-btn-primary {
-    background-color: #16A085;
-    border-color: #16A085;
+.pagination {
+    margin-top: 20px;
+    text-align: center;
 }
 
-.ant-menu-dark .ant-menu-item-selected {
-    background-color: #16A085 !important;
+/* Home.css */
+.post-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    /* Thêm khoảng cách giữa các bài viết */
+}
+
+.post {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.post:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
