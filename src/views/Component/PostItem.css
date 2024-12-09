@@ -1,0 +1,77 @@
+/* PostItem.css */
+
+/* Phần hình ảnh */
+.entry-image img {
+    width: 100%;
+    /* Đảm bảo hình ảnh chiếm toàn bộ chiều rộng */
+    height: auto;
+    /* Giữ tỉ lệ hình ảnh */
+    border-radius: 10px;
+    /* Viền tròn cho hình ảnh */
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    /* Thêm hiệu ứng bóng */
+}
+
+/* Tiêu đề bài viết */
+.blog-single-title {
+    font-size: 22px;
+    /* Kích thước chữ tiêu đề */
+    font-weight: bold;
+    /* Làm cho tiêu đề đậm */
+    margin: 10px 0;
+    /* Khoảng cách trên dưới cho tiêu đề */
+}
+
+/* Nội dung bài viết */
+.entry-content .page-content {
+    padding: 15px;
+    /* Thêm padding xung quanh nội dung */
+    background-color: #f9f9f9;
+    /* Nền cho phần mô tả */
+    border-radius: 10px;
+    /* Viền tròn cho phần mô tả */
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.05);
+    /* Thêm hiệu ứng bóng */
+}
+
+/* Phần mô tả bài viết */
+.entry-content .page-content p {
+    font-size: 16px;
+    /* Kích thước chữ cho mô tả */
+    line-height: 1.8;
+    /* Khoảng cách giữa các dòng cho dễ đọc */
+    color: #333;
+    /* Màu chữ */
+    margin-bottom: 15px;
+    /* Khoảng cách giữa các đoạn văn */
+}
+
+/* Nút "Xem tiếp" */
+.read-more {
+    display: inline-flex;
+    align-items: center;
+    color: #007bff;
+    /* Màu chữ của liên kết */
+    font-size: 16px;
+    text-decoration: none;
+    margin-top: 10px;
+}
+
+/* Phần thông tin bài viết */
+.entry-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+/* Các thông tin meta như thể loại và ngày đăng */
+.entry-meta .blog-label {
+    font-size: 14px;
+    color: #777;
+}
+
+.entry-meta .published {
+    font-size: 14px;
+    color: #777;
+}

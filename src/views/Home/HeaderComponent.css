@@ -1,0 +1,135 @@
+/* HeaderComponent.css */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    flex-wrap: nowrap;
+}
+
+.logo {
+    flex: 0 0 auto;
+    /*  Logo không co giãn */
+}
+
+.logo-image {
+    height: 50px;
+    width: auto;
+    cursor: pointer;
+}
+
+.exam-button {
+    margin-left: 20px;
+    /* Khoảng cách với logo */
+    flex: 0 0 auto;
+    /* Không co giãn */
+}
+
+.btn-exam {
+    background-color: #f0ad4e;
+    /* Màu vàng cam */
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    /* Bo tròn nút */
+    padding: 8px 16px;
+    font-weight: bold;
+}
+
+.btn-exam:hover {
+    background-color: #ec971f;
+    /* Màu vàng cam đậm hơn khi hover */
+}
+
+.class-list {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex: 1 0 auto;
+    /* Chiếm không gian còn lại và có thể co giãn */
+    margin-left: 20px;
+    /* Khoảng cách với nút Thi Online */
+}
+
+.class-item {
+    color: #999;
+    /* Màu xám nhạt */
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.class-item:hover {
+    color: #333;
+    /* Màu xám đậm hơn khi hover */
+}
+
+.create-post-button {
+    flex: 0 0 auto;
+    /* Không co giãn */
+    margin-left: auto;
+    /* Đẩy sang phải */
+}
+
+.btn-create-post {
+    background-color: #1890ff;
+    color: #fff;
+}
+
+.btn-create-post:hover {
+    background-color: #40a9ff;
+}
+
+.ant-dropdown-trigger {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    /* Không co giãn */
+}
+
+.ant-avatar {
+    margin-left: 10px;
+}
+
+.ant-menu-item {
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+.ant-menu-item:hover {
+    background-color: #f0f0f0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        /* Xếp các phần tử theo chiều dọc */
+        align-items: flex-start;
+        /* Căn lề trái */
+    }
+
+    .exam-button {
+        margin: 10px 0;
+        /* Thêm khoảng cách trên dưới */
+    }
+
+    .class-list {
+        justify-content: flex-start;
+        /* Căn lề trái */
+        margin: 10px 0;
+        /* Thêm khoảng cách trên dưới */
+    }
+
+    .create-post-button {
+        margin: 10px 0;
+        /* Thêm khoảng cách trên dưới */
+    }
+}
+
+.btn-create-post .anticon {
+    margin-right: 4px;
+}

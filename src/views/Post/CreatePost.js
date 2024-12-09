@@ -1,20 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Select, Upload, message } from 'antd';
+import React, { useState, useEffect, useRef } from 'react';
+import { Form, Input, Button, Select, message, Upload } from 'antd';
+import ReactQuill from 'react-quill'; // Import Quill
+import 'react-quill/dist/quill.snow.css'; // Import style Quill
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { UploadOutlined } from '@ant-design/icons';
 import './CreatePost.css'; // CSS tùy chỉnh
+import { UploadOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 
 const CreatePost = () => {
     const [subjects, setSubjects] = useState([]); // Danh sách môn học
     const [classes, setClasses] = useState([]); // Danh sách lớp học
-    const [file, setFile] = useState(null); // Tệp tin tải lên
+    const [content, setContent] = useState(''); // Nội dung bài viết
+    const [imageUrl, setImageUrl] = useState(''); // Đường dẫn ảnh đã tải lên
+    const [bannerImage, setBannerImage] = useState(''); // Đường dẫn ảnh banner
     const [loading, setLoading] = useState(false);
+    const [bannerUploaded, setBannerUploaded] = useState(false); // Trạng thái ảnh banner đã được tải lên
+    const [canSubmit, setCanSubmit] = useState(false); // Trạng thái để cho phép submit
     const navigate = useNavigate();
 
     const token = localStorage.getItem('token'); // Lấy token từ localStorage
+
+    const quillRef = useRef(null); // Khai báo ref để tham chiếu đến Quill editor
 
     useEffect(() => {
         if (!token) {
@@ -50,26 +58,100 @@ const CreatePost = () => {
         fetchClasses();
     }, [token, navigate]);
 
-    // Xử lý file tải lên
-    const handleFileChange = ({ file }) => {
-        if (file.status === 'done') {
-            setFile(file.originFileObj);
+    // Hàm để tải ảnh lên (bao gồm banner và ảnh nội dung)
+    const handleImageUpload = async (file, type) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            setLoading(true);
+            const response = await axios.post('http://localhost:8080/books/images', formData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.status === 200) {
+                const imagePath = response.data.value;
+                if (type === 'content') {
+                    setImageUrl(imagePath); // Lưu đường dẫn ảnh cho nội dung
+                    return imagePath;
+                } else if (type === 'banner') {
+                    setBannerImage(imagePath); // Lưu đường dẫn ảnh banner
+                    setBannerUploaded(true); // Đánh dấu ảnh banner đã tải lên
+                    setCanSubmit(true); // Sau khi ảnh banner được xác nhận, cho phép submit
+                    return imagePath;
+                }
+            } else {
+                message.error('Lỗi khi tải ảnh lên.');
+            }
+        } catch (error) {
+            message.error('Lỗi khi tải ảnh lên: ' + error.message);
+        } finally {
+            setLoading(false);
         }
     };
 
-    // Gửi bài viết lên server
+    // Cấu hình Quill với tính năng chèn ảnh
+    const handleEditorChange = (value) => {
+        setContent(value);
+    };
+
+    const modules = {
+        toolbar: [
+            [{ 'header': '1' }, { 'header': '2' }, { 'font': [] }],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            ['bold', 'italic', 'underline'],
+            ['link'],
+            [{ 'align': [] }],
+            ['image'], // Thêm nút chèn ảnh
+            ['clean']
+        ],
+    };
+
+    const imageHandler = async () => {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
+
+        input.onchange = async () => {
+            const file = input.files[0];
+            if (file) {
+                const imageUrl = await handleImageUpload(file, 'content'); // Tải ảnh lên nội dung
+                if (imageUrl) {
+                    const editor = quillRef.current.getEditor(); // Lấy editor từ ref
+                    const range = editor.getSelection();
+                    editor.insertEmbed(range.index, 'image', imageUrl); // Chèn ảnh vào vị trí con trỏ
+                }
+            }
+        };
+    };
+
+    // Cập nhật phần tử chèn ảnh
+    useEffect(() => {
+        if (quillRef.current) {
+            const editor = quillRef.current.getEditor();
+            const toolbar = editor.getModule('toolbar');
+            toolbar.addHandler('image', imageHandler); // Gắn handler cho nút 'image'
+        }
+    }, []);
+
     const handleSubmit = async (values) => {
         setLoading(true);
+
         const postData = {
             title: values.title,
-            content: values.content,
+            content: content, // Gửi nội dung từ Quill
             description: values.description,
             subjectId: values.subjectId,
             classEntityId: values.classEntityId,
+            imageFilePath: imageUrl, // Đính kèm đường dẫn ảnh đã tải lên
+            bannerImage: bannerImage // Đính kèm ảnh banner
         };
 
         try {
-            // Bước 1: Gửi yêu cầu tạo bài viết (POST /posts)
             const postResponse = await axios.post('http://localhost:8080/books/posts', postData, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -79,24 +161,6 @@ const CreatePost = () => {
 
             if (postResponse.data.status === 0) {
                 message.success('Tạo bài viết thành công!');
-
-                const postId = postResponse.data.value.id;
-
-                // Bước 2: Gửi yêu cầu tải ảnh cho bài viết (POST /posts/image/{id})
-                if (file) {
-                    const formData = new FormData();
-                    formData.append('file', file);
-
-                    await axios.post(`http://localhost:8080/books/posts/image/${postId}`, formData, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'multipart/form-data',
-                        },
-                    });
-
-                    message.success('Tải ảnh lên thành công!');
-                }
-
                 navigate('/home'); // Điều hướng về trang chủ sau khi tạo bài viết thành công
             } else {
                 message.error('Tạo bài viết thất bại!');
@@ -136,7 +200,13 @@ const CreatePost = () => {
                     name="content"
                     label="Nội dung"
                     rules={[{ required: true, message: 'Vui lòng nhập nội dung bài viết!' }]} >
-                    <Input.TextArea placeholder="Nội dung bài viết" rows={4} />
+                    <ReactQuill
+                        ref={quillRef} // Sử dụng ref để truy cập vào Quill editor
+                        value={content}
+                        onChange={handleEditorChange} // Cập nhật nội dung Quill
+                        modules={modules} // Sử dụng cấu hình module đã tạo
+                        placeholder="Nhập nội dung bài viết"
+                    />
                 </Form.Item>
 
                 <Form.Item
@@ -157,32 +227,48 @@ const CreatePost = () => {
                     label="Lớp học"
                     rules={[{ required: true, message: 'Vui lòng chọn lớp học!' }]} >
                     <Select placeholder="Chọn lớp học">
-                        {classes.map((classItem) => (
-                            <Option key={classItem.id} value={classItem.id}>
-                                {classItem.name}
+                        {classes.map((cls) => (
+                            <Option key={cls.id} value={cls.id}>
+                                {cls.name}
                             </Option>
                         ))}
                     </Select>
                 </Form.Item>
 
-                <Form.Item label="Tải lên tệp tin">
+                <Form.Item
+                    label="Tải ảnh banner"
+                    name="bannerImage"
+                    extra="Chọn ảnh để làm banner cho bài viết."
+                >
                     <Upload
-                        beforeUpload={() => false} // Ngừng upload ngay lập tức, xử lý trong onChange
-                        onChange={handleFileChange}
-                        showUploadList={false} >
-                        <Button icon={<UploadOutlined />}>Chọn tệp</Button>
+                        showUploadList={false}
+                        beforeUpload={(file) => {
+                            handleImageUpload(file, 'banner');
+                            return false;
+                        }}
+                    >
+                        <Button icon={<UploadOutlined />}>Tải ảnh banner</Button>
                     </Upload>
                 </Form.Item>
 
                 <Form.Item>
-                    <Button
-                        type="primary"
-                        htmlType="submit"
-                        className="create-post-btn"
-                        loading={loading}
-                    >
-                        Tạo bài viết
-                    </Button>
+                    {bannerUploaded ? (
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            loading={loading}
+                            disabled={!canSubmit}
+                        >
+                            Tạo bài viết
+                        </Button>
+                    ) : (
+                        <Button
+                            type="default"
+                            onClick={() => message.warning('Vui lòng xác nhận ảnh banner trước!')}
+                        >
+                            Xác nhận ảnh banner
+                        </Button>
+                    )}
                 </Form.Item>
             </Form>
         </div>

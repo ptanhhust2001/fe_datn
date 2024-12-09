@@ -1,53 +1,52 @@
-import React from "react";
-
+import React from 'react';
+import "./PostItem.css"
 const PostItem = ({ post }) => {
-    // Ensure categories is always an array
-    const categories = post.categories || [];
+    const { id, title, description, imageFilePath, classEntityName, subjectName, createAt } = post;
 
     return (
-        <article id={`post-${post.id}`} className="post">
+        <article id={`post-${id}`} className="post">
             <h2 className="blog-single-title">
-                <a href={post.link} title={post.title}>
-                    {post.title}
+                <a href={`http://localhost:8080/books/posts/${id}`} title={title}>
+                    {title}
                 </a>
             </h2>
+
+            {/* Phần hình ảnh bài viết */}
             <div className="entry-image">
-                <a href={post.link} title={post.title}>
+                <a href={`http://localhost:8080/books/posts/${id}`} title={title}>
+                    {/* Sử dụng imageFilePath từ dữ liệu bài viết */}
                     <img
-                        width="150"
-                        height="60"
-                        src={post.imageFilePath}
-                        alt={post.title}
-                        className="attachment-medium size-medium wp-post-image"
+                        src={imageFilePath} // Sử dụng imageFilePath ở đây
+                        alt={title}
+                        className="post-image"
+                        width="150" // Bạn có thể điều chỉnh kích thước hình ảnh
+                        height="60" // Tùy chỉnh theo nhu cầu
                     />
                 </a>
             </div>
+
+            {/* Phần nội dung bài viết */}
             <div className="entry-content">
                 <div className="page-content">
-                    <p>
-                        {post.description}...
-                        <a className="read-more" href={post.link}>
-                            Xem tiếp <i className="iconsmind-Arrow-Right2"></i>
-                        </a>
-                    </p>
+                    <p>{description}</p>
+                    {/* Nút "Xem tiếp" sẽ chuyển sang trang chi tiết bài viết */}
+                    <a className="read-more" href={`http://localhost:8080/books/posts/${id}`} title={title}>
+                        Xem tiếp <i className="iconsmind-Arrow-Right2"></i>
+                    </a>
                 </div>
             </div>
+
+            {/* Thông tin bài viết */}
             <div className="entry-meta">
                 <span className="blog-label pull-left">
                     <span className="fa fa-folder-open-o"></span>
-                    {categories.map((category, index) => (
-                        <span key={index}>
-                            <a href={category.link} rel="category tag">
-                                {category.name}
-                            </a>
-                            {index < categories.length - 1 && ", "}
-                        </span>
-                    ))}
+                    {subjectName && <a href={`/category/${subjectName}`} rel="category tag">{subjectName}</a>}
+                    {classEntityName && <span> - <a href={`/category/${classEntityName}`} rel="category tag">{classEntityName}</a></span>}
                 </span>
                 <span className="published pull-right">
                     <span className="fa fa-clock-o"></span>
-                    <a href={post.link} title={post.title}>
-                        {post.createdAt}
+                    <a href={`http://localhost:8080/books/posts/${id}`} title={title}>
+                        {new Date(createAt).toLocaleDateString()}
                     </a>
                 </span>
             </div>

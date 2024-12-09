@@ -1,39 +1,37 @@
 // src/pages/Home.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Layout, Menu, Dropdown, Button, Avatar, Spin } from 'antd';
-import { UserOutlined, LogoutOutlined } from '@ant-design/icons';
+import { Layout, Spin } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import PostList from '../Component/PostList';
+import PostList from '../Component/PostList';  // Giả sử bạn có component này để hiển thị danh sách bài viết
+import HeaderComponent from './HeaderComponent'; // Import HeaderComponent từ thư mục Component
 import './Home.css';
 
 const { Header, Content } = Layout;
 
 const Home = () => {
-    const [userInfo, setUserInfo] = useState(null); // User information
-    const [loading, setLoading] = useState(true); // Loading state
-    const [classes, setClasses] = useState([]); // Class data
-    const [currentPage, setCurrentPage] = useState(1); // Current page for posts
-    const [totalPosts, setTotalPosts] = useState(0); // Total number of posts
-    const [pageSize] = useState(10); // Number of posts per page
+    const [userInfo, setUserInfo] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [classes, setClasses] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+    const [totalPosts, setTotalPosts] = useState(0); // Tổng số bài viết
+    const [pageSize] = useState(10); // Số lượng bài viết mỗi trang
     const navigate = useNavigate();
+    const token = localStorage.getItem('token'); // Lấy token từ localStorage
 
-    const token = localStorage.getItem('token'); // Get token from localStorage
-
-    // Fetch user data
+    // Lấy thông tin người dùng và danh sách lớp học
     useEffect(() => {
         if (!token) {
-            navigate('/login'); // Redirect to login if no token
+            navigate('/login'); // Nếu không có token, chuyển hướng tới trang login
             return;
         }
 
-        // Fetch user info
         const fetchUserInfo = async () => {
             try {
                 const response = await axios.get('http://localhost:8080/books/users/my-info', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                setUserInfo(response.data.result); // Update user info
+                setUserInfo(response.data.result);
                 setLoading(false);
             } catch (error) {
                 console.error("Error fetching user info:", error);
@@ -41,13 +39,12 @@ const Home = () => {
             }
         };
 
-        // Fetch classes data
         const fetchClasses = async () => {
             try {
                 const response = await axios.get('http://localhost:8080/books/class', {
                     headers: { accept: '*/*' }
                 });
-                setClasses(response.data.value); // Update classes list
+                setClasses(response.data.value);
             } catch (error) {
                 console.error("Error fetching classes:", error);
             }
@@ -57,77 +54,53 @@ const Home = () => {
         fetchClasses();
     }, [token, navigate]);
 
-    // Handle logout
+    // Đăng xuất
     const handleLogout = () => {
-        localStorage.removeItem('token'); // Remove token from localStorage
-        navigate('/login'); // Redirect to login page
+        localStorage.removeItem('token'); // Xóa token khỏi localStorage
+        navigate('/login'); // Chuyển hướng đến trang login
     };
 
-    // Handle viewing profile
+    // Xem thông tin cá nhân
     const handleViewProfile = () => {
-        navigate('/profile'); // Redirect to profile page
+        navigate('/profile');
     };
 
-    // Menu for user dropdown (Profile and Logout)
-    const userMenu = (
-        <Menu>
-            <Menu.Item key="profile" icon={<UserOutlined />} onClick={handleViewProfile}>
-                Thông tin cá nhân
-            </Menu.Item>
-            <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
-                Đăng xuất
-            </Menu.Item>
-        </Menu>
-    );
+    // Xử lý khi nhấp vào lớp học
+    const handleClassClick = (classId) => {
+        navigate(`/class/${classId}`);
+    };
 
-    // Menu for class dropdown
-    const classMenu = (
-        <Menu>
-            {classes.map((classItem) => (
-                <Menu.Item key={classItem.id} onClick={() => navigate(`/class/${classItem.id}`)}>
-                    {classItem.name}
-                </Menu.Item>
-            ))}
-        </Menu>
-    );
-
-    // Show loading spinner if data is loading
+    // Hiển thị Loading nếu đang tải thông tin
     if (loading) {
-        return <div className="loading"><Spin tip="Đang tải thông tin..." /></div>;
+        return (
+            <div className="loading">
+                <Spin tip="Đang tải thông tin..." />
+            </div>
+        );
     }
 
     return (
         <Layout>
+            {/* Phần header sẽ luôn hiển thị với HeaderComponent */}
             <Header className="header">
-                <div className="logo">Trang chủ</div>
-
-                {/* Dropdown menu for classes */}
-                <Dropdown overlay={classMenu} trigger={['click']} placement="bottomLeft">
-                    <Button type="text" style={{ marginLeft: '20px' }}>
-                        Lớp học
-                    </Button>
-                </Dropdown>
-
-                {/* Avatar dropdown menu for user */}
-                <Dropdown overlay={userMenu} trigger={['click']} placement="bottomRight">
-                    <Button type="text">
-                        <Avatar
-                            src={userInfo.avatarUrl || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"}
-                            icon={<UserOutlined />}
-                            size="large"
-                        />
-                    </Button>
-                </Dropdown>
+                <HeaderComponent
+                    userInfo={userInfo}
+                    onLogout={handleLogout}
+                    onProfileClick={handleViewProfile}
+                    classes={classes}
+                    onClassClick={handleClassClick}
+                />
             </Header>
 
+            {/* Nội dung chính của trang */}
             <Content style={{ padding: '20px' }}>
                 <div className="post-list-container">
-                    {/* Using PostList component for displaying posts */}
+                    {/* Component PostList hỗ trợ phân trang */}
                     <PostList
                         currentPage={currentPage}
                         setCurrentPage={setCurrentPage}
                         pageSize={pageSize}
-                        setTotalPosts={setTotalPosts} // Passing setTotalPosts for updating totalPosts
+                        setTotalPosts={setTotalPosts}
                     />
                 </div>
             </Content>

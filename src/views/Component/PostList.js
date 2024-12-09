@@ -1,75 +1,48 @@
-// src/components/PostList.js
-import React, { useState, useEffect } from "react";
-import PostItem from "./PostItem";
-import { Spin, Alert } from "antd";
-import { useNavigate } from "react-router-dom";
-
-// Hàm giả lập fetching các bài viết từ API
-const fetchPosts = async (page, size) => {
-    try {
-        const response = await fetch(`http://localhost:8080/books/posts?page=${page - 1}&size=${size}`);
-        const data = await response.json();
-        return {
-            posts: data.value,
-            totalPages: data.totalPages, // Số trang tổng cộng
-            totalPosts: data.totalElements, // Tổng số bài viết
-        };
-    } catch (error) {
-        console.error("Error fetching posts:", error);
-        return { posts: [], totalPages: 0, totalPosts: 0 };
-    }
-};
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Spin, Alert, Pagination } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import PostItem from './PostItem';
 
 const PostList = ({ currentPage, setCurrentPage, pageSize, setTotalPosts }) => {
-    const [posts, setPosts] = useState([]);
-    const [totalPages, setTotalPages] = useState(0);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [posts, setPosts] = useState([]); // Danh sách bài viết
+    const [loading, setLoading] = useState(true); // Trạng thái loading
+    const [error, setError] = useState(null); // Lỗi khi tải bài viết
     const navigate = useNavigate();
 
     useEffect(() => {
-        const getPosts = async () => {
+        const fetchPosts = async () => {
             setLoading(true);
-            setError(null);  // Reset error state
-            const { posts, totalPages, totalPosts } = await fetchPosts(currentPage, pageSize); // Fetch posts cho trang hiện tại
-            if (posts.length === 0) {
-                setError("Không có bài viết nào");
+            setError(null);
+            try {
+                const response = await axios.get('http://localhost:8080/books/posts', {
+                    params: {
+                        page: currentPage - 1, // API sử dụng pagination, bắt đầu từ page 0
+                        size: pageSize,
+                    },
+                });
+
+                const data = response.data;
+                setPosts(data.value); // Lưu danh sách bài viết
+                setTotalPosts(data.totalElements); // Cập nhật tổng số bài viết
+                setLoading(false);
+            } catch (err) {
+                setError('Có lỗi xảy ra khi tải bài viết');
+                setLoading(false);
             }
-            setPosts(posts);
-            setTotalPages(totalPages);
-            setTotalPosts(totalPosts); // Cập nhật totalPosts từ API để sử dụng sau
-            setLoading(false);
         };
 
-        getPosts();
+        fetchPosts();
     }, [currentPage, pageSize, setTotalPosts]);
 
-    // Hàm xử lý khi người dùng nhấn vào bài viết
     const handlePostClick = (postId) => {
-        navigate(`/post/${postId}`); // Chuyển hướng đến trang chi tiết bài viết với ID bài viết
+        navigate(`/post/${postId}`); // Chuyển hướng đến trang chi tiết bài viết
     };
 
     return (
-        <div className="post-list">
-            {loading && (
-                <div className="loading">
-                    <Spin tip="Đang tải bài viết..." />
-                </div>
-            )}
-
-            {error && !loading && (
-                <Alert
-                    message="Lỗi"
-                    description={error}
-                    type="error"
-                    showIcon
-                    style={{ marginBottom: "20px" }}
-                />
-            )}
-
-            {posts.length === 0 && !loading && !error && (
-                <p>Không có bài viết nào.</p>
-            )}
+        <div>
+            {loading && <Spin tip="Đang tải bài viết..." />}
+            {error && !loading && <Alert message="Lỗi" description={error} type="error" />}
 
             <div className="post-items">
                 {posts.map((post) => (
@@ -79,25 +52,16 @@ const PostList = ({ currentPage, setCurrentPage, pageSize, setTotalPosts }) => {
                 ))}
             </div>
 
-            {/* Phân trang */}
-            {totalPages > 1 && (
-                <div className="pagination">
-                    <button
-                        onClick={() => setCurrentPage((prevPage) => Math.max(prevPage - 1, 1))}
-                        disabled={currentPage === 1}
-                    >
-                        Previous
-                    </button>
-                    <span>
-                        Page {currentPage} of {totalPages}
-                    </span>
-                    <button
-                        onClick={() => setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages))}
-                        disabled={currentPage === totalPages}
-                    >
-                        Next
-                    </button>
-                </div>
+            {/* Pagination */}
+            {!loading && posts.length > 0 && (
+                <Pagination
+                    current={currentPage}  // Trang hiện tại
+                    total={setTotalPosts}   // Tổng số bài viết
+                    pageSize={pageSize}     // Số bài viết mỗi trang
+                    onChange={(page) => setCurrentPage(page)}  // Cập nhật trang khi người dùng thay đổi
+                    showSizeChanger={false}
+                    style={{ textAlign: 'center', marginTop: '20px' }}
+                />
             )}
         </div>
     );
