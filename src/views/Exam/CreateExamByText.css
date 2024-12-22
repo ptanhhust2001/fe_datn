@@ -1,0 +1,58 @@
+.create-exam-by-text {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.create-exam-by-text h2 {
+    text-align: center;
+    color: #4facfe;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.create-exam-guide {
+    flex: 1;
+    max-width: 45%;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.create-exam-form-container {
+    flex: 1;
+    max-width: 45%;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.create-exam-guide h4 {
+    color: #4facfe;
+    margin-bottom: 10px;
+}
+
+.create-exam-guide ul {
+    list-style: disc;
+    padding-left: 20px;
+}
+
+.create-exam-form .ant-form-item {
+    margin-bottom: 20px;
+}
+
+.create-exam-form .ant-btn-primary {
+    width: 100%;
+    background: linear-gradient(to right, #4facfe, #937eff);
+    border: none;
+    font-weight: bold;
+}
+
+.create-exam-form .ant-btn-primary:hover {
+    background: linear-gradient(to right, #937eff, #4facfe);
+}

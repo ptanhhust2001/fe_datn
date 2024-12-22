@@ -1,125 +1,136 @@
-/* Home.css */
-.loading {
-    text-align: center;
-    margin-top: 50px;
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.logo {
-    color: #fff;
-    font-size: 20px;
-    font-weight: bold;
-}
-
-.avatar {
-    cursor: pointer;
-}
-
-/* Home.css */
-.profile-container {
-    padding: 20px;
-}
-
-.loading {
-    text-align: center;
-    margin-top: 50px;
-}
-
-/* Card */
-.card-title {
-    font-size: 20px;
-    font-weight: bold;
-}
-
-.card-content {
-    margin-top: 20px;
-}
-
-.post-list {
-    margin-top: 20px;
-}
-
-.ant-card {
-    margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.ant-pagination {
-    margin-top: 20px;
-}
-
-.post-list-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-}
-
-.post-list {
+/* Tổng thể */
+body,
+html {
+    margin: 0;
+    padding: 0;
     width: 100%;
-    max-width: 800px;
-    /* Giới hạn chiều rộng của danh sách bài viết */
-    margin: 0 auto;
-}
-
-.ant-card {
-    margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.ant-pagination {
-    margin-top: 20px;
-}
-
-/* src/Home.css */
-.loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-.post-list-container {
-    margin: 0 auto;
-    max-width: 1200px;
-}
-
-.post-list {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.ant-card {
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgb(255, 255, 255);
-}
-
-.pagination {
-    margin-top: 20px;
-    text-align: center;
-}
-
-/* Home.css */
-.post-list {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    /* Thêm khoảng cách giữa các bài viết */
-}
-
-.post {
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    height: 100%;
+    font-family: 'Roboto', sans-serif;
     background-color: #f9f9f9;
 }
 
-.post:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+/* Main Content */
+.main-content {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Bài viết */
+.post-item {
+    padding: 20px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.post-item:last-child {
+    border-bottom: none;
+}
+
+.post-thumbnail {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.post-title {
+    color: #007bff;
+    margin-bottom: 8px;
+}
+
+.post-title:hover {
+    text-decoration: underline;
+}
+
+.post-description {
+    color: #555;
+    margin-bottom: 12px;
+}
+
+.post-meta {
+    font-size: 12px;
+    color: #888;
+    display: flex;
+    align-items: center;
+}
+
+/* Sidebar */
+.sidebar {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-section {
+    margin-bottom: 20px;
+}
+
+.document-category-item a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: #333;
+    text-decoration: none;
+}
+
+.document-category-item a:hover {
+    color: #007bff;
+}
+
+.document-category-item .icon {
+    margin-right: 8px;
+    font-size: 16px;
+    color: #007bff;
+}
+
+.document-category-item .arrow {
+    font-size: 14px;
+    color: #888;
+}
+
+.main-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.post-thumbnail {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.post-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.post-description {
+    font-size: 14px;
+    color: #555;
+    margin: 5px 0;
+}
+
+.post-meta {
+    font-size: 12px;
+    color: #888;
+    display: flex;
+    gap: 10px;
+}
+
+.sidebar {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-section {
+    margin-bottom: 20px;
 }

@@ -1,5 +1,5 @@
 // src/App.js
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Import BrowserRouter
 import Login from './login/login';
@@ -12,10 +12,20 @@ import Admin from './User/Admin';
 import Upload from './Post/Upload';
 import ExamList from './Exam/ExamList';
 import Exam from './Exam/Exam';
+import ManagePosts from './Manage/Post/ManagePosts';
+import UnauthorizedPage from './Unauthorized/UnauthorizedPage';
+import EditPost from './Post/EditPost';
+import HeaderComponent from './Home/HeaderComponent';
+import CustomFooter from './Home/CustomFooter';
+import CreateExamAI from './Exam/CreateExamAI';
+import ExamManagement from './Manage/Exam/ExamManagement';
+import CreateExamByText from './Exam/CreateExamByText';
 
 function App() {
+  const [routeKey, setRouteKey] = useState(Date.now());
   return (
-    <Router> {/* Bao bọc toàn bộ ứng dụng trong Router */}
+    <Router>
+      <HeaderComponent key={routeKey} />
       <div className="App">
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -29,8 +39,15 @@ function App() {
           <Route path="/upload" element={<Upload />} />
           <Route path="/exams" element={<ExamList />} />
           <Route path="/exams/:examId" element={<Exam />} />
+          <Route path="/manage-posts" element={<ManagePosts />} />
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
+          <Route path="/edit-post/:id" element={<EditPost />} />
+          <Route path="/create-exam-ai" element={<CreateExamAI />} />
+          <Route path="/exam-management" element={<ExamManagement />} />
+          <Route path="/create-exam-by-text" element={<CreateExamByText />} />
         </Routes>
       </div>
+      <CustomFooter />
     </Router>
   );
 }

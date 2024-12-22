@@ -1,54 +1,51 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Form, Input, Button, Select, message, Upload } from 'antd';
-import ReactQuill from 'react-quill'; // Import Quill
-import 'react-quill/dist/quill.snow.css'; // Import style Quill
+import { Form, Input, Button, Select, message, Upload, Radio, List } from 'antd';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './CreatePost.css'; // CSS tùy chỉnh
-import { UploadOutlined } from '@ant-design/icons';
+import './CreatePost.css';
+import { UploadOutlined, ArrowLeftOutlined, DeleteOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 
 const CreatePost = () => {
-    const [subjects, setSubjects] = useState([]); // Danh sách môn học
-    const [classes, setClasses] = useState([]); // Danh sách lớp học
-    const [content, setContent] = useState(''); // Nội dung bài viết
-    const [imageUrl, setImageUrl] = useState(''); // Đường dẫn ảnh đã tải lên
-    const [bannerImage, setBannerImage] = useState(''); // Đường dẫn ảnh banner
+    const [subjects, setSubjects] = useState([]);
+    const [classes, setClasses] = useState([]);
+    const [content, setContent] = useState('');
+    const [imageUrl, setImageUrl] = useState('');
+    const [bannerImage, setBannerImage] = useState('');
+    const [materials, setMaterials] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [bannerUploaded, setBannerUploaded] = useState(false); // Trạng thái ảnh banner đã được tải lên
-    const [canSubmit, setCanSubmit] = useState(false); // Trạng thái để cho phép submit
+    const [type, setType] = useState('DOCUMENT');
     const navigate = useNavigate();
 
-    const token = localStorage.getItem('token'); // Lấy token từ localStorage
-
-    const quillRef = useRef(null); // Khai báo ref để tham chiếu đến Quill editor
+    const token = localStorage.getItem('token');
+    const quillRef = useRef(null);
 
     useEffect(() => {
         if (!token) {
-            navigate('/login'); // Nếu không có token, chuyển hướng về trang login
+            navigate('/login');
             return;
         }
 
-        // Lấy danh sách môn học
         const fetchSubjects = async () => {
             try {
                 const response = await axios.get('http://localhost:8080/books/subjects', {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: { Authorization: `Bearer ${token}` },
                 });
-                setSubjects(response.data.value); // Cập nhật môn học
+                setSubjects(response.data.value);
             } catch (error) {
                 console.error('Lỗi khi lấy danh sách môn học:', error);
             }
         };
 
-        // Lấy danh sách lớp học
         const fetchClasses = async () => {
             try {
                 const response = await axios.get('http://localhost:8080/books/class', {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: { Authorization: `Bearer ${token}` },
                 });
-                setClasses(response.data.value); // Cập nhật lớp học
+                setClasses(response.data.value);
             } catch (error) {
                 console.error('Lỗi khi lấy danh sách lớp học:', error);
             }
@@ -58,7 +55,6 @@ const CreatePost = () => {
         fetchClasses();
     }, [token, navigate]);
 
-    // Hàm để tải ảnh lên (bao gồm banner và ảnh nội dung)
     const handleImageUpload = async (file, type) => {
         const formData = new FormData();
         formData.append('file', file);
@@ -67,7 +63,7 @@ const CreatePost = () => {
             setLoading(true);
             const response = await axios.post('http://localhost:8080/books/images', formData, {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data',
                 },
             });
@@ -75,13 +71,9 @@ const CreatePost = () => {
             if (response.status === 200) {
                 const imagePath = response.data.value;
                 if (type === 'content') {
-                    setImageUrl(imagePath); // Lưu đường dẫn ảnh cho nội dung
-                    return imagePath;
+                    setImageUrl(imagePath);
                 } else if (type === 'banner') {
-                    setBannerImage(imagePath); // Lưu đường dẫn ảnh banner
-                    setBannerUploaded(true); // Đánh dấu ảnh banner đã tải lên
-                    setCanSubmit(true); // Sau khi ảnh banner được xác nhận, cho phép submit
-                    return imagePath;
+                    setBannerImage(imagePath);
                 }
             } else {
                 message.error('Lỗi khi tải ảnh lên.');
@@ -93,75 +85,72 @@ const CreatePost = () => {
         }
     };
 
-    // Cấu hình Quill với tính năng chèn ảnh
+    const handleMaterialUpload = async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            setLoading(true);
+            const response = await axios.post('http://localhost:8080/books/images', formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.status === 200) {
+                const newMaterial = {
+                    name: file.name,
+                    urlFile: response.data.value,
+                };
+
+                setMaterials((prev) => [...prev, newMaterial]);
+                message.success(`Tải tệp ${file.name} thành công!`);
+            } else {
+                message.error('Tải tệp thất bại!');
+            }
+        } catch (error) {
+            console.error('Lỗi khi tải tệp:', error);
+            message.error('Có lỗi xảy ra khi tải tệp!');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRemoveMaterial = (index) => {
+        setMaterials((prev) => prev.filter((_, i) => i !== index));
+        message.success('Tài liệu đã được xóa.');
+    };
+
     const handleEditorChange = (value) => {
         setContent(value);
     };
-
-    const modules = {
-        toolbar: [
-            [{ 'header': '1' }, { 'header': '2' }, { 'font': [] }],
-            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-            ['bold', 'italic', 'underline'],
-            ['link'],
-            [{ 'align': [] }],
-            ['image'], // Thêm nút chèn ảnh
-            ['clean']
-        ],
-    };
-
-    const imageHandler = async () => {
-        const input = document.createElement('input');
-        input.setAttribute('type', 'file');
-        input.setAttribute('accept', 'image/*');
-        input.click();
-
-        input.onchange = async () => {
-            const file = input.files[0];
-            if (file) {
-                const imageUrl = await handleImageUpload(file, 'content'); // Tải ảnh lên nội dung
-                if (imageUrl) {
-                    const editor = quillRef.current.getEditor(); // Lấy editor từ ref
-                    const range = editor.getSelection();
-                    editor.insertEmbed(range.index, 'image', imageUrl); // Chèn ảnh vào vị trí con trỏ
-                }
-            }
-        };
-    };
-
-    // Cập nhật phần tử chèn ảnh
-    useEffect(() => {
-        if (quillRef.current) {
-            const editor = quillRef.current.getEditor();
-            const toolbar = editor.getModule('toolbar');
-            toolbar.addHandler('image', imageHandler); // Gắn handler cho nút 'image'
-        }
-    }, []);
 
     const handleSubmit = async (values) => {
         setLoading(true);
 
         const postData = {
             title: values.title,
-            content: content, // Gửi nội dung từ Quill
+            content: content,
             description: values.description,
+            imageFilePath: bannerImage,
+            type: type,
             subjectId: values.subjectId,
             classEntityId: values.classEntityId,
-            imageFilePath: imageUrl, // Đính kèm đường dẫn ảnh đã tải lên
-            bannerImage: bannerImage // Đính kèm ảnh banner
+            materials: materials,
         };
 
         try {
             const postResponse = await axios.post('http://localhost:8080/books/posts', postData, {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
             });
 
-            if (postResponse.data.status === 0) {
+            if (postResponse.data.status === 200) {
                 message.success('Tạo bài viết thành công!');
-                navigate('/home'); // Điều hướng về trang chủ sau khi tạo bài viết thành công
+                navigate('/home');
             } else {
                 message.error('Tạo bài viết thất bại!');
             }
@@ -175,6 +164,14 @@ const CreatePost = () => {
 
     return (
         <div className="create-post-container">
+            <Button
+                type="default"
+                icon={<ArrowLeftOutlined />}
+                onClick={() => navigate('/home')}
+                style={{ marginBottom: '20px' }}
+            >
+                Quay lại Trang chủ
+            </Button>
             <h2>Tạo bài viết mới</h2>
             <Form
                 name="create-post-form"
@@ -185,34 +182,59 @@ const CreatePost = () => {
                 <Form.Item
                     name="title"
                     label="Tiêu đề"
-                    rules={[{ required: true, message: 'Vui lòng nhập tiêu đề bài viết!' }]} >
+                    rules={[{ required: true, message: 'Vui lòng nhập tiêu đề bài viết!' }]}
+                >
                     <Input placeholder="Tiêu đề bài viết" />
                 </Form.Item>
 
                 <Form.Item
                     name="description"
                     label="Mô tả"
-                    rules={[{ required: true, message: 'Vui lòng nhập mô tả bài viết!' }]} >
+                    rules={[{ required: true, message: 'Vui lòng nhập mô tả bài viết!' }]}
+                >
                     <Input placeholder="Mô tả bài viết" />
                 </Form.Item>
 
                 <Form.Item
                     name="content"
                     label="Nội dung"
-                    rules={[{ required: true, message: 'Vui lòng nhập nội dung bài viết!' }]} >
+                    rules={[{ required: true, message: 'Vui lòng nhập nội dung bài viết!' }]}
+                >
                     <ReactQuill
-                        ref={quillRef} // Sử dụng ref để truy cập vào Quill editor
+                        ref={quillRef}
                         value={content}
-                        onChange={handleEditorChange} // Cập nhật nội dung Quill
-                        modules={modules} // Sử dụng cấu hình module đã tạo
+                        onChange={handleEditorChange}
+                        modules={{
+                            toolbar: [
+                                [{ header: '1' }, { header: '2' }, { font: [] }],
+                                [{ list: 'ordered' }, { list: 'bullet' }],
+                                ['bold', 'italic', 'underline'],
+                                ['link'],
+                                [{ align: [] }],
+                                ['image'],
+                                ['clean'],
+                            ],
+                        }}
                         placeholder="Nhập nội dung bài viết"
                     />
                 </Form.Item>
 
                 <Form.Item
+                    name="type"
+                    label="Loại bài viết"
+                    rules={[{ required: true, message: 'Vui lòng chọn loại bài viết!' }]}
+                >
+                    <Radio.Group onChange={(e) => setType(e.target.value)} value={type}>
+                        <Radio value="DOCUMENT">Tài liệu</Radio>
+                        <Radio value="EXAM_QUESTION">Đề thi</Radio>
+                    </Radio.Group>
+                </Form.Item>
+
+                <Form.Item
                     name="subjectId"
                     label="Môn học"
-                    rules={[{ required: true, message: 'Vui lòng chọn môn học!' }]} >
+                    rules={[{ required: true, message: 'Vui lòng chọn môn học!' }]}
+                >
                     <Select placeholder="Chọn môn học">
                         {subjects.map((subject) => (
                             <Option key={subject.id} value={subject.id}>
@@ -225,7 +247,8 @@ const CreatePost = () => {
                 <Form.Item
                     name="classEntityId"
                     label="Lớp học"
-                    rules={[{ required: true, message: 'Vui lòng chọn lớp học!' }]} >
+                    rules={[{ required: true, message: 'Vui lòng chọn lớp học!' }]}
+                >
                     <Select placeholder="Chọn lớp học">
                         {classes.map((cls) => (
                             <Option key={cls.id} value={cls.id}>
@@ -249,26 +272,71 @@ const CreatePost = () => {
                     >
                         <Button icon={<UploadOutlined />}>Tải ảnh banner</Button>
                     </Upload>
+                    {bannerImage && (
+                        <div style={{ marginTop: '10px' }}>
+                            <img
+                                src={bannerImage}
+                                alt="Ảnh banner"
+                                style={{
+                                    maxWidth: '100%',
+                                    height: 'auto',
+                                    border: '1px solid #ddd',
+                                    padding: '5px',
+                                    borderRadius: '5px',
+                                }}
+                            />
+                        </div>
+                    )}
+                </Form.Item>
+
+                <Form.Item
+                    label="Tải tài liệu đính kèm"
+                    extra="Chọn các tệp để đính kèm vào bài viết."
+                >
+                    <Upload
+                        multiple
+                        beforeUpload={(file) => {
+                            handleMaterialUpload(file);
+                            return false;
+                        }}
+                        showUploadList={false}
+                    >
+                        <Button icon={<UploadOutlined />}>Tải tài liệu</Button>
+                    </Upload>
+                    {materials.length > 0 && (
+                        <List
+                            bordered
+                            dataSource={materials}
+                            renderItem={(material, index) => (
+                                <List.Item
+                                    actions={[
+                                        <Button
+                                            danger
+                                            icon={<DeleteOutlined />}
+                                            onClick={() => handleRemoveMaterial(index)}
+                                        >
+                                            Xóa
+                                        </Button>,
+                                    ]}
+                                >
+                                    <a href={material.urlFile} target="_blank" rel="noopener noreferrer">
+                                        {material.name}
+                                    </a>
+                                </List.Item>
+                            )}
+                            style={{ marginTop: '10px' }}
+                        />
+                    )}
                 </Form.Item>
 
                 <Form.Item>
-                    {bannerUploaded ? (
-                        <Button
-                            type="primary"
-                            htmlType="submit"
-                            loading={loading}
-                            disabled={!canSubmit}
-                        >
-                            Tạo bài viết
-                        </Button>
-                    ) : (
-                        <Button
-                            type="default"
-                            onClick={() => message.warning('Vui lòng xác nhận ảnh banner trước!')}
-                        >
-                            Xác nhận ảnh banner
-                        </Button>
-                    )}
+                    <Button
+                        type="primary"
+                        htmlType="submit"
+                        loading={loading}
+                    >
+                        Tạo bài viết
+                    </Button>
                 </Form.Item>
             </Form>
         </div>

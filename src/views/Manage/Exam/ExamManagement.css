@@ -1,0 +1,66 @@
+.exam-management {
+    padding: 20px;
+    background-color: #f7f9fc;
+    /* Màu nền nhạt */
+    min-height: 100vh;
+    /* Chiều cao tối thiểu */
+}
+
+.exam-management h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.ant-table {
+    background: #fff;
+    border-radius: 8px;
+    /* Bo góc bảng */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    /* Hiệu ứng đổ bóng */
+}
+
+.ant-table-thead>tr>th {
+    background-color: #f0f2f5;
+    /* Màu nền tiêu đề bảng */
+    font-weight: bold;
+    color: #555;
+    text-align: center;
+}
+
+.ant-table-tbody>tr>td {
+    text-align: center;
+    font-size: 14px;
+    color: #444;
+}
+
+.ant-table-tbody>tr:hover {
+    background-color: #e6f7ff;
+    /* Hiệu ứng hover */
+}
+
+.ant-btn-danger {
+    background-color: #ff4d4f;
+    border-color: #ff4d4f;
+}
+
+.ant-btn-danger:hover {
+    background-color: #ff7875;
+    border-color: #ff7875;
+}
+
+.ant-modal-confirm-body {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 16px;
+    color: #333;
+}
+
+.ant-modal-title {
+    color: #ff4d4f;
+    /* Màu đỏ cho tiêu đề */
+    font-weight: bold;
+}

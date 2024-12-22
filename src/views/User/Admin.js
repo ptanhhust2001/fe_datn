@@ -78,7 +78,6 @@ const Admin = () => {
                 message.success('Cập nhật người dùng thành công!');
                 setUsers(users.map(user => (user.id === editingUser.id ? { ...user, ...values } : user)));
             } else {
-                // Thêm người dùng mới (username và password sẽ được yêu cầu ở màn hình khác)
                 const response = await axios.post('http://localhost:8080/books/users', values, {
                     headers: { Authorization: `Bearer ${token}` },
                 });

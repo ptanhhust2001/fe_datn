@@ -1,94 +1,214 @@
-import React from 'react';
-import { Menu, Dropdown, Button, Avatar } from 'antd';
-import { UserOutlined, LogoutOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Menu, Dropdown, Button, Avatar, Modal, Row, Col, Card } from 'antd';
+import { UserOutlined, LogoutOutlined, PlusOutlined, EditOutlined, TeamOutlined, BarsOutlined } from '@ant-design/icons';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 import './HeaderComponent.css';
-import { PlusOutlined } from '@ant-design/icons';
 
-const HeaderComponent = ({ userInfo, onLogout, onProfileClick, classes, onClassClick }) => {
-    // Kiểm tra classes trước khi sử dụng .map()
-    const classList = Array.isArray(classes) ? classes : [];
+const HeaderComponent = () => {
+    const [userInfo, setUserInfo] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const fetchUserInfo = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setUserInfo(null);
+                return;
+            }
+
+            const response = await axios.get('http://localhost:8080/books/users/my-info', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setUserInfo(response.data.result);
+        } catch (error) {
+            console.error("Error fetching user info:", error);
+            setUserInfo(null);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        setUserInfo(null);
+        navigate('/login');
+    };
+
+    const handleLogin = () => {
+        navigate('/login');
+    };
+
+    useEffect(() => {
+        fetchUserInfo();
+    }, [location]);
+
+    const showModal = () => {
+        setIsModalVisible(true);
+    };
+
+    const handleCancel = () => {
+        setIsModalVisible(false);
+    };
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <div className="header">
-            {/* Logo với hình ảnh, chuyển hướng về trang Home khi click */}
+            {/* Logo */}
             <div className="logo">
                 <Link to="/home">
-                    <img src="http://localhost:8080/books/file/logo/logoweb.jpg" alt="Logo" className="logo-image" />
+                    <img
+                        src="http://localhost:8080/books/file/logo/tai_lieu_bach_khoa.png"
+                        alt="Logo"
+                        className="logo-image"
+                    />
                 </Link>
             </div>
 
-            {/* Dropdown danh sách các lớp học */}
-            <div className="class-list">
-                {classList.map((classItem) => (
-                    <Dropdown
-                        key={classItem.id}
-                        overlay={
-                            <Menu>
-                                {/* Hiển thị các môn học trong lớp */}
-                                {classItem.subjects.map(subject => (
-                                    <Menu.Item key={subject.id} onClick={() => onClassClick(classItem.id)}>
-                                        {subject.name}
-                                    </Menu.Item>
-                                ))}
-                            </Menu>
-                        }
-                        trigger={['click']}
-                        placement="bottomLeft"
-                    >
-                        <Button className="class-item">{classItem.name}</Button>
-                    </Dropdown>
-                ))}
-            </div>
-
-            {/* Nút Tạo Bài Viết */}
-            <div className="create-post-button">
-                <Link to="/create-post">
-                    <Button className="btn-create-post" icon={<PlusOutlined />}>
-                        Tạo Bài Viết
-                    </Button>
-                </Link>
-            </div>
+            {/* Nút tạo bài viết */}
+            {userInfo?.roles.some(role => ['ADMIN', 'MANAGE'].includes(role.name)) && (
+                <div className="create-post-button">
+                    <Link to="/create-post">
+                        <Button className="btn-create-post" icon={<PlusOutlined />}>
+                            Tạo Bài Viết
+                        </Button>
+                    </Link>
+                </div>
+            )}
 
 
-            {/* Nút Thi Thử */}
+            {/* Nút thi thử */}
             <div className="exam-button">
-                <Link to="/exams"> {/* Thay đổi đường dẫn đến trang danh sách đề thi */}
+                <Link to="/exams">
                     <Button className="btn-exam">
                         Thi Thử
                     </Button>
                 </Link>
             </div>
 
-            {/* Avatar và Menu người dùng */}
-            <Dropdown
-                overlay={
-                    <Menu>
-                        {/* Thông tin cá nhân */}
-                        <Menu.Item key="profile" icon={<UserOutlined />} onClick={onProfileClick}>
-                            Thông tin cá nhân
-                        </Menu.Item>
-                        {/* Đăng xuất */}
-                        <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={onLogout}>
-                            Đăng xuất
-                        </Menu.Item>
-                    </Menu>
-                }
-                trigger={['click']}
-                placement="bottomRight"
-            >
-                <Button type="text">
-                    {/* Hiển thị avatar người dùng */}
-                    <Avatar
-                        src={userInfo?.avatarUrl || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"}
-                        icon={<UserOutlined />}
-                        size="large"
-                    />
+            {/* Nút tạo bài thi */}
+            <div className="create-exam-button">
+                <Button
+                    className="btn-create-exam"
+                    icon={<PlusOutlined />}
+                    onClick={showModal}
+                >
+                    Tạo Bài Thi
                 </Button>
-            </Dropdown>
+            </div>
 
+            {/* Nút đăng nhập hoặc avatar */}
+            <div className="login-button">
+                {userInfo ? (
+                    <Dropdown
+                        overlay={
+                            <Menu>
+                                {userInfo.roles.some(role => role.name === 'ADMIN') && (
+                                    <>
+                                        <Menu.Item
+                                            key="manage-posts"
+                                            icon={<EditOutlined />}
+                                            onClick={() => navigate('/manage-posts')}
+                                        >
+                                            Quản lý bài viết
+                                        </Menu.Item>
+                                        <Menu.Item
+                                            key="manage-users"
+                                            icon={<TeamOutlined />}
+                                            onClick={() => navigate('/admin')}
+                                        >
+                                            Quản lý người dùng
+                                        </Menu.Item>
+                                        <Menu.Item
+                                            key="my-exams"
+                                            icon={<BarsOutlined />}
+                                            onClick={() => navigate('/exam-management')}
 
+                                        >
+                                            Bài thi của tôi
+                                        </Menu.Item>
+                                    </>
+                                )}
+                                <Menu.Item key="profile" icon={<UserOutlined />} onClick={() => navigate('/profile')}>
+                                    Thông tin cá nhân
+                                </Menu.Item>
+                                <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
+                                    Đăng xuất
+                                </Menu.Item>
+                            </Menu>
+                        }
+                        trigger={['click']}
+                        placement="bottomRight"
+                    >
+                        <Button type="text">
+                            <Avatar
+                                src={userInfo?.avatarUrl || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"}
+                                icon={<UserOutlined />}
+                                size="large"
+                            />
+                        </Button>
+                    </Dropdown>
+                ) : (
+                    <Button
+                        type="primary"
+                        style={{ background: 'linear-gradient(to right, #4facfe, #937eff)', color: '#fff' }}
+                        onClick={handleLogin}
+                    >
+                        Đăng nhập
+                    </Button>
+                )}
+            </div>
 
+            {/* Modal Tạo bài thi */}
+            <Modal
+                title="Tạo đề thi mới"
+                open={isModalVisible}
+                footer={null}
+                onCancel={handleCancel}
+                centered
+            >
+                <Row gutter={[16, 16]} justify="center">
+                    <Col span={16}>
+                        <Card
+                            hoverable
+                            className="exam-card"
+                            onClick={() => {
+                                setIsModalVisible(false);
+                                navigate('/create-exam-ai');
+                            }}
+                        >
+                            <div className="exam-card-content">
+                                <img src="http://localhost:8080/books/file/logo/c_ai.png" alt="Trợ lý AI" />
+                                <h3>Trợ lý AI</h3>
+                                <p>Tạo đề thi nhanh hơn với trợ lý AI</p>
+                            </div>
+                        </Card>
+                    </Col>
+                    <Col span={16}>
+                        <Card
+                            hoverable
+                            className="exam-card"
+                            onClick={() => {
+                                setIsModalVisible(false); // Tắt popup
+                                navigate('/create-exam-by-text'); // Chuyển đến trang tạo bài thi bằng văn bản
+                            }}
+                        >
+                            <div className="exam-card-content">
+                                <img src="http://localhost:8080/books/file/logo/c_text.png" alt="Văn bản" />
+                                <h3>Văn bản</h3>
+                                <p>Tạo đề thi nhanh bằng cách soạn thảo văn bản</p>
+                            </div>
+                        </Card>
+
+                    </Col>
+                </Row>
+            </Modal>
         </div>
     );
 };

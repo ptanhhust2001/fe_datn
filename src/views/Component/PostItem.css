@@ -1,77 +1,118 @@
-/* PostItem.css */
+/* Tổng thể bài viết */
+.post {
+    display: flex;
+    align-items: flex-start;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+    /* Đường phân cách */
+    margin-bottom: 30px;
+    padding-bottom: 30px !important;
+    background-color: #fff;
+    /* Màu nền */
+    border-radius: 8px;
+    /* Bo tròn góc */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
 
-/* Phần hình ảnh */
+.post:hover {
+    transform: scale(1.02);
+    /* Phóng to nhẹ khi hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Tăng bóng mờ */
+}
+
+/* Hình ảnh bài viết */
+.entry-image {
+    flex-shrink: 0;
+    width: 150px;
+    height: 100px;
+    margin-right: 15px;
+    border-radius: 8px;
+    overflow: hidden;
+    /* Ẩn phần thừa nếu ảnh vượt kích thước */
+}
+
 .entry-image img {
     width: 100%;
-    /* Đảm bảo hình ảnh chiếm toàn bộ chiều rộng */
-    height: auto;
-    /* Giữ tỉ lệ hình ảnh */
-    border-radius: 10px;
-    /* Viền tròn cho hình ảnh */
-    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-    /* Thêm hiệu ứng bóng */
+    height: 100%;
+    object-fit: cover;
+    /* Đảm bảo giữ tỉ lệ ảnh */
+    border-radius: 8px;
+}
+
+/* Nội dung bài viết */
+.entry-content {
+    flex-grow: 1;
 }
 
 /* Tiêu đề bài viết */
 .blog-single-title {
-    font-size: 22px;
-    /* Kích thước chữ tiêu đề */
+    font-size: 18px;
     font-weight: bold;
-    /* Làm cho tiêu đề đậm */
-    margin: 10px 0;
-    /* Khoảng cách trên dưới cho tiêu đề */
-}
-
-/* Nội dung bài viết */
-.entry-content .page-content {
-    padding: 15px;
-    /* Thêm padding xung quanh nội dung */
-    background-color: #f9f9f9;
-    /* Nền cho phần mô tả */
-    border-radius: 10px;
-    /* Viền tròn cho phần mô tả */
-    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.05);
-    /* Thêm hiệu ứng bóng */
-}
-
-/* Phần mô tả bài viết */
-.entry-content .page-content p {
-    font-size: 16px;
-    /* Kích thước chữ cho mô tả */
-    line-height: 1.8;
-    /* Khoảng cách giữa các dòng cho dễ đọc */
+    margin-bottom: 5px;
+    line-height: 1.4;
     color: #333;
-    /* Màu chữ */
-    margin-bottom: 15px;
-    /* Khoảng cách giữa các đoạn văn */
 }
 
-/* Nút "Xem tiếp" */
-.read-more {
-    display: inline-flex;
-    align-items: center;
-    color: #007bff;
-    /* Màu chữ của liên kết */
-    font-size: 16px;
+.blog-single-title a {
     text-decoration: none;
-    margin-top: 10px;
+    color: #007bff;
+    transition: color 0.2s ease;
 }
 
-/* Phần thông tin bài viết */
+.blog-single-title a:hover {
+    color: #0056b3;
+    /* Màu đậm hơn khi hover */
+    text-decoration: underline;
+}
+
+/* Mô tả bài viết */
+.page-content p {
+    font-size: 14px;
+    color: #555;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    /* Hiển thị tối đa 2 dòng */
+    -webkit-box-orient: vertical;
+}
+
+.page-content .read-more {
+    color: #007bff;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.page-content .read-more:hover {
+    color: #0056b3;
+    /* Màu đậm hơn khi hover */
+    text-decoration: underline;
+}
+
+/* Thông tin meta */
 .entry-meta {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-top: 20px;
+    font-size: 13px;
+    color: #888;
+    margin-top: 10px;
 }
 
-/* Các thông tin meta như thể loại và ngày đăng */
-.entry-meta .blog-label {
-    font-size: 14px;
-    color: #777;
+.blog-label a,
+.published a {
+    color: #007bff;
+    text-decoration: none;
 }
 
-.entry-meta .published {
-    font-size: 14px;
-    color: #777;
+.blog-label a:hover,
+.published a:hover {
+    text-decoration: underline;
+}
+
+.blog-label .fa,
+.published .fa {
+    margin-right: 5px;
+    color: #007bff;
 }

@@ -1,108 +1,271 @@
-// src/pages/Home.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Layout, Spin } from 'antd';
+import {
+    Layout,
+    Spin,
+    Row,
+    Col,
+    Typography,
+    List,
+    Card,
+    Divider,
+    Pagination,
+    Select,
+    Input,
+    Button,
+} from 'antd';
+import { ArrowRightOutlined, ClockCircleOutlined, FolderOpenOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import PostList from '../Component/PostList';  // Giả sử bạn có component này để hiển thị danh sách bài viết
-import HeaderComponent from './HeaderComponent'; // Import HeaderComponent từ thư mục Component
 import './Home.css';
 
-const { Header, Content } = Layout;
+const { Content } = Layout;
+const { Title, Text } = Typography;
+const { Option } = Select;
 
 const Home = () => {
-    const [userInfo, setUserInfo] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [classes, setClasses] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-    const [totalPosts, setTotalPosts] = useState(0); // Tổng số bài viết
-    const [pageSize] = useState(10); // Số lượng bài viết mỗi trang
+    const [posts, setPosts] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize] = useState(10);
+    const [totalPosts, setTotalPosts] = useState(0);
+    const [classes, setClasses] = useState([]); // Danh sách lớp học
+    const [subjects, setSubjects] = useState([]); // Danh sách môn học
+    const [filters, setFilters] = useState({ classId: null, subjectId: null, name: '', type: null });
     const navigate = useNavigate();
-    const token = localStorage.getItem('token'); // Lấy token từ localStorage
 
-    // Lấy thông tin người dùng và danh sách lớp học
-    useEffect(() => {
-        if (!token) {
-            navigate('/login'); // Nếu không có token, chuyển hướng tới trang login
-            return;
-        }
-
-        const fetchUserInfo = async () => {
-            try {
-                const response = await axios.get('http://localhost:8080/books/users/my-info', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setUserInfo(response.data.result);
-                setLoading(false);
-            } catch (error) {
-                console.error("Error fetching user info:", error);
-                setLoading(false);
-            }
-        };
-
-        const fetchClasses = async () => {
-            try {
-                const response = await axios.get('http://localhost:8080/books/class', {
-                    headers: { accept: '*/*' }
-                });
+    const fetchClasses = async () => {
+        try {
+            const response = await axios.get('http://localhost:8080/books/class');
+            if (response.data.status === 200) {
                 setClasses(response.data.value);
-            } catch (error) {
-                console.error("Error fetching classes:", error);
             }
-        };
+        } catch (error) {
+            console.error('Error fetching classes:', error);
+        }
+    };
 
-        fetchUserInfo();
+    // Fetch posts from API
+    const fetchPosts = async (page) => {
+        setLoading(true);
+        try {
+            const { classId, subjectId, name, type } = filters;
+            const advanceSearch = [
+                classId && `classEntity.id＝${classId}`,
+                subjectId && `subject.id＝${subjectId}`,
+                name && `title～${name}`,
+                type && `type＝${type}`,
+            ]
+                .filter(Boolean)
+                .join('＆');
+
+            const params = {
+                page: page - 1,
+                size: pageSize,
+                ...(advanceSearch && { advanceSearch }),
+            };
+
+            const response = await axios.get('http://localhost:8080/books/posts', { params });
+
+            setPosts(response.data.value || []);
+            setTotalPosts(response.data.totalElements || 0);
+        } catch (error) {
+            console.error('Error fetching posts:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchClasses();
-    }, [token, navigate]);
+        fetchPosts(currentPage);
+    }, [currentPage, filters]);
 
-    // Đăng xuất
-    const handleLogout = () => {
-        localStorage.removeItem('token'); // Xóa token khỏi localStorage
-        navigate('/login'); // Chuyển hướng đến trang login
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
     };
 
-    // Xem thông tin cá nhân
-    const handleViewProfile = () => {
-        navigate('/profile');
+    const handlePostClick = (postId) => {
+        navigate(`/post/${postId}`);
     };
 
-    // Xử lý khi nhấp vào lớp học
-    const handleClassClick = (classId) => {
-        navigate(`/class/${classId}`);
+    const handleFilterChange = (key, value) => {
+        setFilters((prev) => ({ ...prev, [key]: value }));
+        if (key === 'classId') {
+            const selectedClass = classes.find((c) => c.id === value);
+            setSubjects(selectedClass ? selectedClass.subjects : []);
+            setFilters((prev) => ({ ...prev, subjectId: null }));
+        }
+        setCurrentPage(1);
     };
-
-    // Hiển thị Loading nếu đang tải thông tin
-    if (loading) {
-        return (
-            <div className="loading">
-                <Spin tip="Đang tải thông tin..." />
-            </div>
-        );
-    }
 
     return (
-        <Layout>
-            {/* Phần header sẽ luôn hiển thị với HeaderComponent */}
-            <Header className="header">
-                <HeaderComponent
-                    userInfo={userInfo}
-                    onLogout={handleLogout}
-                    onProfileClick={handleViewProfile}
-                    classes={classes}
-                    onClassClick={handleClassClick}
-                />
-            </Header>
+        <Layout style={{ width: '100%', height: '100%' }}>
+            <Content style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+                <Row gutter={20}>
+                    {/* Filters */}
+                    <Col span={24}>
+                        <Card bordered={false} className="filter-card">
+                            <Row gutter={16}>
+                                <Col span={6}>
+                                    <Select
+                                        placeholder="Chọn lớp"
+                                        onChange={(value) => handleFilterChange('classId', value)}
+                                        style={{ width: '100%' }}
+                                        allowClear
+                                    >
+                                        {classes.map((cls) => (
+                                            <Option key={cls.id} value={cls.id}>
+                                                {cls.name}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                </Col>
+                                <Col span={6}>
+                                    <Select
+                                        placeholder="Chọn môn học"
+                                        onChange={(value) => handleFilterChange('subjectId', value)}
+                                        style={{ width: '100%' }}
+                                        allowClear
+                                        disabled={!filters.classId} // Vô hiệu hóa nếu chưa chọn lớp
+                                    >
+                                        {subjects.map((subject) => (
+                                            <Option key={subject.id} value={subject.id}>
+                                                {subject.name}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                </Col>
+                                <Col span={6}>
+                                    <Select
+                                        placeholder="Loại bài viết"
+                                        onChange={(value) => handleFilterChange('type', value)}
+                                        style={{ width: '100%' }}
+                                        allowClear
+                                    >
+                                        <Option value="EXAM_QUESTION">Đề thi</Option>
+                                        <Option value="DOCUMENT">Bài viết</Option>
+                                    </Select>
+                                </Col>
+                                <Col span={4}>
+                                    <Input
+                                        placeholder="Nhập từ khóa"
+                                        onChange={(e) => handleFilterChange('name', e.target.value)}
+                                        value={filters.name}
+                                    />
+                                </Col>
+                                <Col span={2}>
+                                    <Button type="primary" onClick={() => fetchPosts(1)}>
+                                        Tìm kiếm
+                                    </Button>
+                                </Col>
+                            </Row>
+                        </Card>
+                    </Col>
+                </Row>
 
-            {/* Nội dung chính của trang */}
-            <Content style={{ padding: '20px' }}>
-                <div className="post-list-container">
-                    {/* Component PostList hỗ trợ phân trang */}
-                    <PostList
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
-                        pageSize={pageSize}
-                        setTotalPosts={setTotalPosts}
-                    />
-                </div>
+                {/* Post List */}
+                <Row gutter={20} style={{ marginTop: '20px' }}>
+                    <Col xs={24} lg={18}>
+                        <Card bordered={false} className="main-content">
+                            <Spin spinning={loading} tip="Đang tải bài viết...">
+                                <List
+                                    itemLayout="vertical"
+                                    dataSource={posts}
+                                    renderItem={(post) => (
+                                        <List.Item
+                                            key={post.id}
+                                            className="post-item"
+                                            onClick={() => handlePostClick(post.id)}
+                                        >
+                                            <Row gutter={16}>
+                                                <Col span={6}>
+                                                    <img
+                                                        src={
+                                                            post.imageFilePath ||
+                                                            'http://localhost:8080/books/file/logo/tai_lieu_bach_khoa.png'
+                                                        }
+                                                        alt={post.title}
+                                                        className="post-thumbnail"
+                                                    />
+                                                </Col>
+                                                <Col span={18}>
+                                                    <Title level={5} className="post-title">
+                                                        {post.title}
+                                                    </Title>
+                                                    <Text className="post-description">
+                                                        {post.description}
+                                                    </Text>
+                                                    <div className="post-meta">
+                                                        <Text type="secondary">
+                                                            <FolderOpenOutlined />{' '}
+                                                            {post.subjectName || 'Chưa phân loại'} {'-'}{' '}
+                                                            {post.classEntityName || 'Chưa phân loại'}
+                                                        </Text>
+                                                        <Divider type="vertical" />
+                                                        <Text type="secondary">
+                                                            <ClockCircleOutlined />{' '}
+                                                            {new Date(post.createAt).toLocaleDateString()}
+                                                        </Text>
+                                                    </div>
+                                                </Col>
+                                            </Row>
+                                        </List.Item>
+                                    )}
+                                />
+                            </Spin>
+                            <Pagination
+                                current={currentPage}
+                                pageSize={pageSize}
+                                total={totalPosts}
+                                onChange={handlePageChange}
+                                style={{ marginTop: '20px', textAlign: 'center' }}
+                            />
+                        </Card>
+                    </Col>
+                    {/* Sidebar */}
+                    <Col xs={24} lg={6}>
+                        <Card bordered={false} className="sidebar">
+                            <div className="sidebar-section">
+                                <Title level={5}>Danh mục tài liệu</Title>
+                                <List
+                                    dataSource={[
+                                        { name: 'Tài liệu Lớp 12', classId: 3 },
+                                        { name: 'Tài liệu Lớp 11', classId: 2 },
+                                        { name: 'Tài liệu Lớp 10', classId: 1 },
+                                    ]}
+                                    renderItem={(item) => (
+                                        <List.Item
+                                            className="document-category-item"
+                                            onClick={() =>
+                                                handleFilterChange('type', 'DOCUMENT')
+                                            }
+
+                                        >
+                                            <a href="#">
+                                                <FolderOpenOutlined className="icon" />
+                                                {item.name}
+                                                <ArrowRightOutlined className="arrow" />
+                                            </a>
+                                        </List.Item>
+                                    )}
+                                />
+                            </div>
+                            <Divider />
+
+                            <div className="sidebar-section">
+                                <Title level={5}>Danh mục đề thi</Title>
+                                <List
+                                    dataSource={['Đề thi Lớp 12', 'Đề thi Lớp 11', 'Đề thi Lớp 10']}
+                                    renderItem={(item) => (
+                                        <List.Item>
+                                            <a href="#">{item}</a>
+                                        </List.Item>
+                                    )}
+                                />
+                            </div>
+                        </Card>
+                    </Col>
+                </Row>
             </Content>
         </Layout>
     );

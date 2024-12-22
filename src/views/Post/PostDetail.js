@@ -1,23 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import HeaderComponent from '../Home/HeaderComponent'; // Import HeaderComponent
-import './PostDetail.css';  // Style cho trang chi tiết bài viết
+import { List, Input, Button, message } from 'antd';
+import './PostDetail.css';
+
+const { TextArea } = Input;
 
 const PostDetail = () => {
-    const { id } = useParams(); // Lấy id bài viết từ URL
+    const { id } = useParams();
     const [post, setPost] = useState(null);
+    const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [newComment, setNewComment] = useState('');
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
-    const userInfo = { // Tạm thời sử dụng dữ liệu giả
-        avatarUrl: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
-    };
 
     useEffect(() => {
         if (!token) {
-            navigate('/login');  // Nếu không có token, chuyển hướng về trang login
+            navigate('/login');
             return;
         }
 
@@ -27,8 +28,9 @@ const PostDetail = () => {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
-                if (response.status === 200 && response.data.value) {
+                if (response.data.status === 200) {
                     setPost(response.data.value);
+                    setComments(response.data.value.comments || []);
                 } else {
                     setError('Bài viết không tồn tại');
                 }
@@ -41,6 +43,34 @@ const PostDetail = () => {
 
         fetchPostDetail();
     }, [id, token, navigate]);
+
+    const handleAddComment = async () => {
+        if (!newComment.trim()) {
+            message.error('Nội dung bình luận không được để trống!');
+            return;
+        }
+
+        try {
+            const response = await axios.post(
+                'http://localhost:8080/books/comments',
+                { content: newComment, postId: post.id },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+
+            if (response.status === 200) {
+                message.success('Thêm bình luận thành công!');
+                setComments([...comments, response.data.value]);
+                setNewComment('');
+            } else {
+                message.error('Không thể thêm bình luận.');
+            }
+        } catch (err) {
+            console.error(err);
+            message.error('Có lỗi xảy ra khi thêm bình luận.');
+        }
+    };
 
     if (loading) {
         return <div className="loading">Đang tải...</div>;
@@ -56,20 +86,7 @@ const PostDetail = () => {
 
     return (
         <div className="post-detail-page">
-            {/* Phần Header */}
-            <HeaderComponent
-                userInfo={userInfo}
-                onLogout={() => {
-                    localStorage.removeItem('token');
-                    navigate('/login');
-                }}
-                onProfileClick={() => navigate('/profile')}
-                classes={[{ id: 1, name: 'Lớp 10', subjects: [{ id: 1, name: 'Toán' }] }]} // Dữ liệu giả cho lớp
-                onClassClick={(classId) => console.log(`Chọn lớp ${classId}`)}
-            />
-
             <div className="post-detail-container">
-                {/* Hiển thị ảnh banner nếu có */}
                 {post.imageFilePath && (
                     <div className="post-banner">
                         <img src={post.imageFilePath} alt={post.title} className="banner-image" />
@@ -82,12 +99,57 @@ const PostDetail = () => {
                     Ngày tạo: {new Date(post.createAt).toLocaleString()} | Cập nhật: {new Date(post.updateAt).toLocaleString()}
                 </p>
 
-                {/* Chúng ta sử dụng 'dangerouslySetInnerHTML' để hiển thị nội dung HTML */}
                 <div className="post-content" dangerouslySetInnerHTML={{ __html: post.content }}></div>
 
                 <div className="post-meta">
                     <p><strong>Môn học:</strong> {post.subjectName}</p>
                     <p><strong>Lớp học:</strong> {post.classEntityName}</p>
+                </div>
+
+                {/* Hiển thị danh sách tài liệu */}
+                {post.materials && post.materials.length > 0 && (
+                    <div className="materials-section">
+                        <h3>Tài liệu</h3>
+                        <List
+                            bordered
+                            dataSource={post.materials}
+                            renderItem={(material) => (
+                                <List.Item>
+                                    <a href={material.urlFile} target="_blank" rel="noopener noreferrer">
+                                        {material.name}
+                                    </a>
+                                </List.Item>
+                            )}
+                        />
+                    </div>
+                )}
+
+                <div className="comments-section">
+                    <h3>Bình luận</h3>
+
+                    <List
+                        dataSource={comments}
+                        renderItem={(comment) => (
+                            <List.Item key={comment.id}>
+                                <div>
+                                    <p><strong>{comment.createBy}</strong> ({new Date(comment.createAt).toLocaleString()}):</p>
+                                    <p>{comment.content}</p>
+                                </div>
+                            </List.Item>
+                        )}
+                    />
+
+                    <div className="add-comment">
+                        <TextArea
+                            rows={4}
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            placeholder="Nhập bình luận của bạn..."
+                        />
+                        <Button type="primary" onClick={handleAddComment} style={{ marginTop: '10px' }}>
+                            Thêm bình luận
+                        </Button>
+                    </div>
                 </div>
 
                 <button className="back-btn" onClick={() => navigate('/home')}>Quay lại danh sách bài viết</button>

@@ -2,18 +2,26 @@
 
 .header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    /* Cách đều các phần tử trong hàng */
     padding: 10px 20px;
-    background-color: #ffffff;
+    background-color: #fff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    flex-wrap: nowrap;
+}
+
+.create-post-button,
+.exam-button,
+.login-button {
+    margin: 0 10px;
+    /* Khoảng cách giữa các nút */
 }
 
 .logo {
-    flex: 0 0 auto;
-    /*  Logo không co giãn */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
 }
 
 .logo-image {
@@ -56,15 +64,15 @@
 }
 
 .class-item {
-    color: #999;
-    /* Màu xám nhạt */
+    color: #333;
+    /* Màu chữ tối hơn */
     font-weight: 500;
     cursor: pointer;
 }
 
 .class-item:hover {
-    color: #333;
-    /* Màu xám đậm hơn khi hover */
+    color: #111;
+    /* Màu chữ đậm hơn khi hover */
 }
 
 .create-post-button {
@@ -75,12 +83,14 @@
 }
 
 .btn-create-post {
-    background-color: #1890ff;
+    background-color: #61abff;
+    /* Màu đỏ tươi */
     color: #fff;
 }
 
 .btn-create-post:hover {
-    background-color: #40a9ff;
+    background-color: #ff4b3a;
+    /* Màu đỏ đậm khi hover */
 }
 
 .ant-dropdown-trigger {
@@ -132,4 +142,77 @@
 
 .btn-create-post .anticon {
     margin-right: 4px;
+}
+
+.create-exam-button {
+    margin-left: 20px;
+    flex: 0 0 auto;
+}
+
+.btn-create-exam {
+    font-weight: bold;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    color: #fff;
+    background: linear-gradient(to right, #937eff, #4facfe);
+    /* Gradient tím */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-create-exam:hover {
+    background: linear-gradient(to right, #4facfe, #937eff);
+    /* Gradient đổi hướng khi hover */
+}
+
+.create-exam-button .btn-create-exam {
+    background: linear-gradient(to right, #937eff, #4facfe);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 8px 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.create-exam-button .btn-create-exam:hover {
+    background: linear-gradient(to right, #4facfe, #937eff);
+}
+
+.exam-card {
+    border-radius: 12px;
+    text-align: center;
+    transition: transform 0.3s ease;
+    height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.exam-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.exam-card-content img {
+    height: 40px;
+    margin-bottom: 10px;
+}
+
+.exam-card-content h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.exam-card-content p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
 }

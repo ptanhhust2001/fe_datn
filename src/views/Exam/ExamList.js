@@ -1,92 +1,119 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Layout, Spin, Table, Pagination, Modal } from 'antd';
+import { Layout, Spin, Table, Pagination, Modal, Button, Select, Form, Input } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import HeaderComponent from '../Home/HeaderComponent';
 import './ExamList.css'; // Import CSS file
+
 const { Content } = Layout;
+const { Option } = Select;
 
 const ExamList = () => {
     const [userInfo, setUserInfo] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [exams, setExams] = useState([]);  // Danh sách đề thi
-    const [totalExams, setTotalExams] = useState(0);  // Tổng số đề thi
-    const [currentPage, setCurrentPage] = useState(1);  // Trang hiện tại
-    const [pageSize] = useState(10);  // Số lượng đề thi mỗi trang
-    const [isModalVisible, setIsModalVisible] = useState(false);  // Điều khiển modal
-    const [examToTake, setExamToTake] = useState(null);  // Đề thi người dùng chọn
+    const [exams, setExams] = useState([]);
+    const [totalExams, setTotalExams] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize] = useState(10);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [examToTake, setExamToTake] = useState(null);
+    const [searchParams, setSearchParams] = useState({ classId: '', subjectId: '', name: '' });
+    const [classes, setClasses] = useState([]);
+    const [subjects, setSubjects] = useState([]);
     const navigate = useNavigate();
-    const token = localStorage.getItem('token');  // Lấy token từ localStorage
+    const token = localStorage.getItem('token');
 
-    // Lấy thông tin người dùng và danh sách đề thi
+    useEffect(() => {
+        const fetchClasses = async () => {
+            try {
+                const response = await axios.get('http://localhost:8080/books/class');
+                if (response.data.status === 200) {
+                    setClasses(response.data.value);
+                }
+            } catch (error) {
+                console.error('Error fetching classes:', error);
+            }
+        };
+
+        fetchClasses();
+    }, []);
+
     useEffect(() => {
         if (!token) {
-            navigate('/login'); // Nếu không có token, chuyển hướng tới trang login
+            navigate('/login');
             return;
         }
 
         const fetchUserInfo = async () => {
             try {
                 const response = await axios.get('http://localhost:8080/books/users/my-info', {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: { Authorization: `Bearer ${token}` },
                 });
                 setUserInfo(response.data.result);
                 setLoading(false);
             } catch (error) {
-                console.error("Error fetching user info:", error);
+                console.error('Error fetching user info:', error);
                 setLoading(false);
             }
         };
 
         const fetchExams = async () => {
             try {
-                const response = await axios.get(`http://localhost:8080/books/exams?page=${currentPage - 1}&size=${pageSize}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const { classId, subjectId, name, type } = searchParams;
+                const advanceSearch = [
+                    classId && `classEntity.id＝${classId}`,
+                    subjectId && `subject.id＝${subjectId}`,
+                    name && `name～${name}`,
+                    name && `type＝${type}`,
+                ]
+                    .filter(Boolean)
+                    .join('＆');
+
+                const response = await axios.get(
+                    `http://localhost:8080/books/exams?page=${currentPage - 1}&size=${pageSize}&advanceSearch=${advanceSearch}`,
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
+                );
                 setExams(response.data.value);
                 setTotalExams(response.data.total);
             } catch (error) {
-                console.error("Error fetching exams:", error);
+                console.error('Error fetching exams:', error);
             }
         };
 
         fetchUserInfo();
         fetchExams();
-    }, [token, currentPage, pageSize, navigate]);
+    }, [token, currentPage, pageSize, searchParams, navigate]);
 
-    // Đăng xuất
-    const handleLogout = () => {
-        localStorage.removeItem('token');  // Xóa token khỏi localStorage
-        navigate('/login');  // Chuyển hướng đến trang login
+    const handleSearch = (values) => {
+        setSearchParams(values);
+        setCurrentPage(1);
     };
 
-    // Xem thông tin cá nhân
-    const handleViewProfile = () => {
-        navigate('/profile');
+    const handleClassChange = (value) => {
+        setSearchParams((prev) => ({ ...prev, classId: value, subjectId: '' }));
+        const selectedClass = classes.find((cls) => cls.id === value);
+        setSubjects(selectedClass ? selectedClass.subjects : []);
     };
 
-    // Hiển thị modal xác nhận khi nhấp vào đề thi
     const handleExamClick = (examId) => {
-        // Lưu lại đề thi người dùng chọn
-        const selectedExam = exams.find(exam => exam.id === examId);
+        const selectedExam = exams.find((exam) => exam.id === examId);
         setExamToTake(selectedExam);
-        setIsModalVisible(true); // Hiển thị modal xác nhận
+        setIsModalVisible(true);
     };
 
-    // Xử lý khi người dùng nhấn "Xác nhận" trong modal
     const handleConfirmExam = () => {
         if (examToTake) {
-            navigate(`/exams/${examToTake.id}`);  // Chuyển hướng tới trang thi của đề thi
+            navigate(`/exams/${examToTake.id}`);
         }
-        setIsModalVisible(false);  // Đóng modal
+        setIsModalVisible(false);
     };
 
-    // Xử lý khi người dùng nhấn "Hủy" trong modal
+
     const handleCancel = () => {
-        setIsModalVisible(false);  // Đóng modal
+        setIsModalVisible(false);
     };
 
-    // Hiển thị Loading nếu đang tải thông tin
     if (loading) {
         return (
             <div className="loading">
@@ -97,53 +124,91 @@ const ExamList = () => {
 
     return (
         <Layout>
-            {/* Phần header sẽ luôn hiển thị với HeaderComponent */}
-            <Layout.Header className="header">
-                <HeaderComponent
-                    userInfo={userInfo}
-                    onLogout={handleLogout}
-                    onProfileClick={handleViewProfile}
-                    classes={[]}  // Bạn có thể truyền lớp học nếu cần
-                    onClassClick={() => { }} // Xử lý nếu có cần click lớp học
-                />
-            </Layout.Header>
-
-            {/* Nội dung chính của trang */}
             <Content style={{ padding: '20px' }}>
                 <div className="exam-list-container">
                     <h1>Danh sách đề thi</h1>
+
+                    <Form
+                        layout="inline"
+                        onFinish={handleSearch}
+                        initialValues={{ classId: '', subjectId: '', name: '' }}
+                        style={{ marginBottom: '20px' }}
+                    >
+                        <Form.Item name="classId" label="Lớp">
+                            <Select
+                                style={{ width: 120 }}
+                                placeholder="Chọn lớp"
+                                onChange={handleClassChange}
+                                allowClear
+                            >
+                                {classes.map((cls) => (
+                                    <Option key={cls.id} value={cls.id}>
+                                        {cls.name}
+                                    </Option>
+                                ))}
+                            </Select>
+                        </Form.Item>
+                        <Form.Item name="subjectId" label="Môn học">
+                            <Select
+                                style={{ width: 150 }}
+                                placeholder="Chọn môn"
+                                disabled={!subjects.length}
+                                allowClear
+                            >
+                                {subjects.map((sub) => (
+                                    <Option key={sub.id} value={sub.id}>
+                                        {sub.name}
+                                    </Option>
+                                ))}
+                            </Select>
+                        </Form.Item>
+                        <Form.Item name="name" label="Từ khóa">
+                            <Input placeholder="Nhập tên đề thi" allowClear />
+                        </Form.Item>
+                        <Form.Item>
+                            <Button type="primary" htmlType="submit">
+                                Tìm kiếm
+                            </Button>
+                        </Form.Item>
+                    </Form>
+
                     <Table
                         dataSource={exams}
                         rowKey="id"
                         pagination={false}
                         onRow={(record) => ({
-                            onClick: () => handleExamClick(record.id),  // Xử lý click vào dòng
+                            onClick: () => handleExamClick(record.id),
                         })}
                     >
                         <Table.Column title="ID" dataIndex="id" key="id" />
                         <Table.Column title="Tên đề thi" dataIndex="name" key="name" />
-                        <Table.Column title="Lớp" dataIndex="classEntityId" key="classEntityId" />
-                        <Table.Column title="Môn học" dataIndex="subjectId" key="subjectId" />
+                        <Table.Column title="Lớp" dataIndex="classEntityName" key="classEntityName" />
+                        <Table.Column title="Môn học" dataIndex="subjectName" key="subjectName" />
                         <Table.Column title="Người tạo" dataIndex="createBy" key="createBy" />
                         <Table.Column
                             title="Ngày tạo"
                             dataIndex="createAt"
                             key="createAt"
-                            render={(text) => new Date(text).toLocaleString()}  // Format ngày giờ
+                            render={(text) => new Date(text).toLocaleString()}
+                        />
+                        <Table.Column
+                            title="Hành động"
+                            key="action"
+                            render={(text, record) => (
+                                <Button onClick={() => handleExamClick(record.id)}>Vào ôn thi</Button>
+                            )}
                         />
                     </Table>
 
-                    {/* Pagination */}
                     <Pagination
                         current={currentPage}
                         pageSize={pageSize}
                         total={totalExams}
-                        onChange={page => setCurrentPage(page)}
-                        style={{ marginTop: '20px' }}
+                        onChange={(page) => setCurrentPage(page)}
+                        style={{ marginTop: '20px', textAlign: 'center' }}
                     />
                 </div>
 
-                {/* Modal xác nhận thi */}
                 <Modal
                     title="Xác nhận tham gia thi"
                     visible={isModalVisible}

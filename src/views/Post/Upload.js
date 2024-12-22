@@ -22,7 +22,7 @@ function Upload() {
             setError(null);
 
             const formData = new FormData();
-            formData.append('file', selectedFile); // Sửa 'image' thành 'file'
+            formData.append('file', selectedFile);
 
             const response = await axios.post('http://localhost:8080/books/images', formData, {
                 headers: {

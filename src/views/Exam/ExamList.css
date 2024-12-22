@@ -1,73 +1,127 @@
-/* ExamList.css */
+/* Tổng thể */
+body,
+html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f9f9f9;
+}
+
+/* Container chính */
 .exam-list-container {
     background: #fff;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f4f4f4;
-}
-
-.examListContainer {
-    background-color: #fff;
-    /* Nền trắng */
-    padding: 20px;
-    border-radius: 8px;
-    /* Bo góc nhẹ */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    /* Thêm đổ bóng */
-}
-
-.examListTitle {
+/* Tiêu đề */
+.exam-list-container h1 {
     font-size: 24px;
     font-weight: bold;
-    margin-bottom: 20px;
     color: #333;
-    /* Màu chữ tiêu đề */
+    margin-bottom: 20px;
+    text-align: center;
 }
 
-.table {
-    width: 100%;
-    border-collapse: collapse;
+/* Bảng danh sách */
+.ant-table {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
 }
 
-.table th,
-.table td {
-    padding: 12px 16px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-    /* Đường viền mảnh */
-}
-
-.table th {
+.ant-table-thead>tr>th {
     background-color: #f5f5f5;
-    /* Nền header bảng */
     font-weight: bold;
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+    color: #555;
 }
 
-.table tr:hover {
+.ant-table-tbody>tr>td {
+    text-align: center;
+    color: #333;
+}
+
+.ant-table-tbody>tr:hover {
     background-color: #f9f9f9;
-    /* Hover effect */
+    cursor: pointer;
 }
 
-.pagination {
+/* Nút "Vào ôn thi" */
+.ant-table-tbody .exam-action-button {
+    background: linear-gradient(to right, #4facfe, #00f2fe);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.ant-table-tbody .exam-action-button:hover {
+    background: linear-gradient(to right, #00f2fe, #4facfe);
+    opacity: 0.9;
+    cursor: pointer;
+}
+
+/* Phân trang */
+.ant-pagination {
     margin-top: 20px;
-    text-align: right;
+    text-align: center;
 }
 
-@media (max-width: 768px) {
-    .table {
-        font-size: 14px;
-    }
+.ant-pagination-item {
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    line-height: 36px;
+    font-size: 14px;
+    color: #555;
+    border: 1px solid #e0e0e0;
+    margin: 0 4px;
+    transition: all 0.3s;
+}
 
-    .table th,
-    .table td {
-        padding: 8px 12px;
-    }
+.ant-pagination-item:hover {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+}
+
+.ant-pagination-item-active {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+}
+
+/* Modal */
+.ant-modal-content {
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.ant-modal-title {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    color: #333;
+}
+
+.ant-modal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.ant-btn-primary {
+    background-color: #4caf50;
+    border: none;
+}
+
+.ant-btn-primary:hover {
+    background-color: #45a049;
 }

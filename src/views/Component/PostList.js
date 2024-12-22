@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Spin, Alert, Pagination } from 'antd';
-import { useNavigate } from 'react-router-dom';
 import PostItem from './PostItem';
+import './PostList.css';
 
-const PostList = ({ currentPage, setCurrentPage, pageSize, setTotalPosts }) => {
-    const [posts, setPosts] = useState([]); // Danh sách bài viết
-    const [loading, setLoading] = useState(true); // Trạng thái loading
-    const [error, setError] = useState(null); // Lỗi khi tải bài viết
-    const navigate = useNavigate();
+const PostList = () => {
+    const [posts, setPosts] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPosts, setTotalPosts] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -17,52 +19,46 @@ const PostList = ({ currentPage, setCurrentPage, pageSize, setTotalPosts }) => {
             try {
                 const response = await axios.get('http://localhost:8080/books/posts', {
                     params: {
-                        page: currentPage - 1, // API sử dụng pagination, bắt đầu từ page 0
+                        page: currentPage - 1,
                         size: pageSize,
                     },
                 });
 
                 const data = response.data;
-                setPosts(data.value); // Lưu danh sách bài viết
-                setTotalPosts(data.totalElements); // Cập nhật tổng số bài viết
-                setLoading(false);
+                setPosts(data.value);
+                setTotalPosts(data.totalElements);
             } catch (err) {
                 setError('Có lỗi xảy ra khi tải bài viết');
+            } finally {
                 setLoading(false);
             }
         };
 
         fetchPosts();
-    }, [currentPage, pageSize, setTotalPosts]);
+    }, [currentPage, pageSize]);
 
-    const handlePostClick = (postId) => {
-        navigate(`/post/${postId}`); // Chuyển hướng đến trang chi tiết bài viết
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
     };
 
     return (
-        <div>
+        <div className="post-list-container">
             {loading && <Spin tip="Đang tải bài viết..." />}
             {error && !loading && <Alert message="Lỗi" description={error} type="error" />}
 
             <div className="post-items">
                 {posts.map((post) => (
-                    <div key={post.id} onClick={() => handlePostClick(post.id)}>
-                        <PostItem post={post} />
-                    </div>
+                    <PostItem key={post.id} post={post} />
                 ))}
             </div>
 
-            {/* Pagination */}
-            {!loading && posts.length > 0 && (
-                <Pagination
-                    current={currentPage}  // Trang hiện tại
-                    total={setTotalPosts}   // Tổng số bài viết
-                    pageSize={pageSize}     // Số bài viết mỗi trang
-                    onChange={(page) => setCurrentPage(page)}  // Cập nhật trang khi người dùng thay đổi
-                    showSizeChanger={false}
-                    style={{ textAlign: 'center', marginTop: '20px' }}
-                />
-            )}
+            <Pagination
+                current={currentPage}
+                pageSize={pageSize}
+                total={totalPosts}
+                onChange={handlePageChange}
+                style={{ marginTop: '20px', textAlign: 'center' }}
+            />
         </div>
     );
 };
