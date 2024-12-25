@@ -41,7 +41,7 @@ const CreateExamByText = () => {
         if (file.status === 'removed') {
             setFile(null);
         } else {
-            setFile(file.originFileObj);
+            setFile(file);
         }
     };
 
@@ -132,7 +132,7 @@ const CreateExamByText = () => {
                                 rules={[{ required: true, message: 'Vui lòng tải lên file!' }]}
                             >
                                 <Upload
-                                    beforeUpload={() => false}
+                                    beforeUpload={(file) => handleFileChange(file)}
                                     onChange={handleFileChange}
                                     maxCount={1}
                                     fileList={file ? [{ name: file.name, status: 'done' }] : []}

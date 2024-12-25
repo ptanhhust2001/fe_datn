@@ -10,17 +10,15 @@ const Exam = () => {
     const [examData, setExamData] = useState(null);
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [userAnswers, setUserAnswers] = useState([]);
-    const [timeLeft, setTimeLeft] = useState(3600); // 1 giờ = 3600 giây
-    const [isSubmitted, setIsSubmitted] = useState(false); // Để kiểm tra xem bài đã nộp chưa
-    const [incorrectAnswers, setIncorrectAnswers] = useState([]); // Lưu danh sách câu trả lời sai
-    const [correctAnswers, setCorrectAnswers] = useState([]); // Lưu danh sách câu trả lời đúng
+    const [timeLeft, setTimeLeft] = useState(3600);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [incorrectAnswers, setIncorrectAnswers] = useState([]);
+    const [correctAnswers, setCorrectAnswers] = useState([]);
 
-    // Hàm xử lý công thức và thay thế dấu cách bằng &nbsp;
     const renderLatex = (text) => {
         return text.replace(/\s/g, '&nbsp;');
     };
 
-    // Xử lý dữ liệu công thức cho các câu hỏi và đáp án
     const processLatexData = (questions) => {
         return questions.map(question => ({
             ...question,
@@ -32,7 +30,6 @@ const Exam = () => {
         }));
     };
 
-    // Lấy dữ liệu từ API
     useEffect(() => {
         const fetchExam = async () => {
             try {
@@ -49,7 +46,6 @@ const Exam = () => {
         };
         fetchExam();
 
-        // Set timer
         const timer = setInterval(() => {
             if (!isSubmitted) {
                 setTimeLeft(prevTime => prevTime - 1);
@@ -59,7 +55,6 @@ const Exam = () => {
         return () => clearInterval(timer);
     }, [examId, isSubmitted]);
 
-    // Xử lý thay đổi câu trả lời
     const handleAnswerChange = (questionIndex, answer) => {
         if (!isSubmitted) {
             const newAnswers = [...userAnswers];
@@ -68,48 +63,42 @@ const Exam = () => {
         }
     };
 
-    // Chuyển sang câu hỏi tiếp theo
     const handleNextQuestion = () => {
 
         setCurrentQuestion(prevQuestion => Math.min(prevQuestion + 1, examData.questions.length - 1));
 
     };
 
-    // Quay lại câu hỏi trước
     const handlePrevQuestion = () => {
 
         setCurrentQuestion(prevQuestion => Math.max(prevQuestion - 1, 0));
 
     };
 
-    // Chọn câu hỏi từ danh sách câu hỏi
     const handleQuestionItemClick = (questionIndex) => {
 
         setCurrentQuestion(questionIndex);
 
     };
 
-    // Gửi kết quả
     const handleSubmit = async () => {
         try {
-            // Tạo mảng đáp án dưới định dạng yêu cầu với id câu hỏi
             const answers = userAnswers.map((answer, index) => {
                 const answerMap = { 1: 'A', 2: 'B', 3: 'C', 4: 'D' };
-                const question = questions[index]; // Lấy câu hỏi dựa trên index
+                const question = questions[index];
                 return {
-                    id: question.id, // Lấy id của câu hỏi
-                    answer: answer ? answerMap[answer] : '0' // Nếu có đáp án thì chuyển thành A, B, C, D, nếu không thì là 0
+                    id: question.id,
+                    answer: answer ? answerMap[answer] : '0'
                 };
             });
 
-            // Gửi dữ liệu đến API
             const response = await axios.post('http://localhost:8080/books/exams/check-answer', { answers });
 
             if (response.status === 200) {
                 const { value } = response.data;
-                setIncorrectAnswers(value.answersInCorrect); // Lưu các câu trả lời sai
-                setCorrectAnswers(value.answersCorrect); // Lưu các câu trả lời đúng
-                setIsSubmitted(true); // Đánh dấu là đã nộp bài
+                setIncorrectAnswers(value.answersInCorrect);
+                setCorrectAnswers(value.answersCorrect);
+                setIsSubmitted(true);
                 message.success(`Tổng số câu hỏi: ${value.totalAns}, Số câu đúng: ${value.totalAnsCorrect}`);
             }
         } catch (error) {
@@ -118,7 +107,6 @@ const Exam = () => {
         }
     };
 
-    // Nếu dữ liệu bài thi chưa được tải, hiển thị loading
     if (!examData) {
         return <div>Loading...</div>;
     }
@@ -126,7 +114,6 @@ const Exam = () => {
     const { questions } = examData;
     const currentQuestionData = questions[currentQuestion];
 
-    // Định dạng thời gian
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
     const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
@@ -143,7 +130,7 @@ const Exam = () => {
 
                         <Radio.Group
                             onChange={e => handleAnswerChange(currentQuestion, e.target.value)}
-                            value={userAnswers[currentQuestion]} // Giữ nguyên giá trị này
+                            value={userAnswers[currentQuestion]}
                             className="radio-group"
                             disabled={isSubmitted}
                         >

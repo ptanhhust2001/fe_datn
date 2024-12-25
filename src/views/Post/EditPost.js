@@ -8,37 +8,34 @@ import './EditPost.css';
 import { UploadOutlined } from '@ant-design/icons';
 
 const EditPost = () => {
-    const [post, setPost] = useState(null); // Bài viết cần chỉnh sửa
-    const [content, setContent] = useState(''); // Nội dung bài viết
-    const [loading, setLoading] = useState(true); // Trạng thái tải dữ liệu
+    const [post, setPost] = useState(null);
+    const [content, setContent] = useState('');
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    const { id } = useParams(); // Lấy ID bài viết từ URL
-    const token = localStorage.getItem('token'); // Lấy token từ localStorage
-    const quillRef = useRef(null); // Khai báo ref để tham chiếu tới ReactQuill editor
+    const { id } = useParams();
+    const token = localStorage.getItem('token');
+    const quillRef = useRef(null);
 
-    // Hàm lấy dữ liệu bài viết hiện tại
     const fetchPostDetails = async () => {
         try {
             const response = await axios.get(`http://localhost:8080/books/posts/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const data = response.data.value;
-            setPost(data); // Lưu bài viết vào state
-            setContent(data.content); // Gán nội dung vào state content
+            setPost(data);
+            setContent(data.content);
         } catch (error) {
             console.error('Lỗi khi lấy chi tiết bài viết:', error);
             message.error('Không thể tải chi tiết bài viết.');
         } finally {
-            setLoading(false); // Tắt trạng thái tải
+            setLoading(false);
         }
     };
 
-    // Hàm xử lý khi nội dung thay đổi
     const handleEditorChange = (value) => {
         setContent(value);
     };
 
-    // Hàm tải ảnh lên server
     const handleImageUpload = async (file) => {
         const formData = new FormData();
         formData.append('file', file);
@@ -53,7 +50,7 @@ const EditPost = () => {
 
             if (response.status === 200) {
                 const imagePath = response.data.value;
-                return imagePath; // Trả về đường dẫn ảnh
+                return imagePath;
             } else {
                 message.error('Lỗi khi tải ảnh lên.');
             }
@@ -63,7 +60,6 @@ const EditPost = () => {
         }
     };
 
-    // Hàm xử lý chèn ảnh vào ReactQuill
     const imageHandler = async () => {
         const input = document.createElement('input');
         input.setAttribute('type', 'file');
@@ -73,26 +69,24 @@ const EditPost = () => {
         input.onchange = async () => {
             const file = input.files[0];
             if (file) {
-                const imageUrl = await handleImageUpload(file); // Tải ảnh lên server
+                const imageUrl = await handleImageUpload(file);
                 if (imageUrl) {
-                    const editor = quillRef.current.getEditor(); // Lấy editor từ ref
-                    const range = editor.getSelection(); // Lấy vị trí con trỏ
-                    editor.insertEmbed(range.index, 'image', imageUrl); // Chèn ảnh vào editor
+                    const editor = quillRef.current.getEditor();
+                    const range = editor.getSelection();
+                    editor.insertEmbed(range.index, 'image', imageUrl);
                 }
             }
         };
     };
 
-    // Cập nhật phần tử chèn ảnh
     useEffect(() => {
         if (quillRef.current) {
             const editor = quillRef.current.getEditor();
             const toolbar = editor.getModule('toolbar');
-            toolbar.addHandler('image', imageHandler); // Gắn handler cho nút 'image'
+            toolbar.addHandler('image', imageHandler);
         }
     }, []);
 
-    // Gửi dữ liệu cập nhật bài viết
     const handleSubmit = async (values) => {
         setLoading(true);
         const postData = {
@@ -111,7 +105,7 @@ const EditPost = () => {
 
             if (response.data.status === 200) {
                 message.success('Chỉnh sửa bài viết thành công!');
-                navigate('/manage-posts'); // Quay lại trang quản lý bài viết
+                navigate('/manage-posts');
             } else {
                 message.error('Chỉnh sửa bài viết thất bại.');
             }
@@ -123,13 +117,12 @@ const EditPost = () => {
         }
     };
 
-    // Lấy dữ liệu bài viết khi component render
     useEffect(() => {
         if (!token) {
-            navigate('/login'); // Nếu không có token, điều hướng về login
+            navigate('/login');
             return;
         }
-        fetchPostDetails(); // Lấy chi tiết bài viết
+        fetchPostDetails();
     }, [id, token, navigate]);
 
     return (
@@ -173,7 +166,7 @@ const EditPost = () => {
                         rules={[{ required: true, message: 'Vui lòng nhập nội dung bài viết!' }]}
                     >
                         <ReactQuill
-                            ref={quillRef} // Gắn ref vào ReactQuill
+                            ref={quillRef}
                             value={content}
                             onChange={handleEditorChange}
                             placeholder="Nhập nội dung bài viết"
@@ -182,7 +175,7 @@ const EditPost = () => {
                                     [{ header: '1' }, { header: '2' }, { font: [] }],
                                     [{ list: 'ordered' }, { list: 'bullet' }],
                                     ['bold', 'italic', 'underline'],
-                                    ['link', 'image'], // Thêm nút chèn ảnh
+                                    ['link', 'image'],
                                     ['clean'],
                                 ],
                             }}
