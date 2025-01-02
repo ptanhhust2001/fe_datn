@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Layout, Spin, Table, Pagination, Modal, Button, Select, Form, Input } from 'antd';
+import { Layout, Spin, Table, Pagination, Modal, Button, Select, Form, Input, Menu } from 'antd';
+import { HomeOutlined, FileTextOutlined, CommentOutlined, MessageOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import './ExamList.css'; // Import CSS file
+import './ExamList.css';
+import SideBarMenu from '../Home/SideBarMenu';
 
-const { Content } = Layout;
+const { Content, Sider } = Layout;
 const { Option } = Select;
 
 const ExamList = () => {
@@ -58,15 +60,14 @@ const ExamList = () => {
 
         const fetchExams = async () => {
             try {
-                const { classId, subjectId, name, type } = searchParams;
+                const { classId, subjectId, name } = searchParams;
                 const advanceSearch = [
-                    classId && `classEntity.id＝${classId}`,
-                    subjectId && `subject.id＝${subjectId}`,
-                    name && `name～${name}`,
-                    name && `type＝${type}`,
+                    classId && `classEntity.id=${classId}`,
+                    subjectId && `subject.id=${subjectId}`,
+                    name && `name~${name}`,
                 ]
                     .filter(Boolean)
-                    .join('＆');
+                    .join('&');
 
                 const response = await axios.get(
                     `http://localhost:8080/books/exams?page=${currentPage - 1}&size=${pageSize}&advanceSearch=${advanceSearch}`,
@@ -109,10 +110,15 @@ const ExamList = () => {
         setIsModalVisible(false);
     };
 
-
     const handleCancel = () => {
         setIsModalVisible(false);
     };
+
+    const menuItems = [
+        { key: 'home', icon: <HomeOutlined />, label: 'Home', onClick: () => navigate('/home') },
+        { key: 'exam', icon: <FileTextOutlined />, label: 'Đề thi', onClick: () => navigate('/exams') },
+        { key: 'forum', icon: <CommentOutlined />, label: 'Diễn đàn', onClick: () => navigate('/forum') },
+    ];
 
     if (loading) {
         return (
@@ -124,6 +130,16 @@ const ExamList = () => {
 
     return (
         <Layout>
+            {/* Sidebar bên trái */}
+            <Sider width={200} style={{ background: '#fff', borderRight: '1px solid #f0f0f0' }}>
+                {/* <Menu
+                    mode="vertical"
+                    defaultSelectedKeys={['exam']}
+                    style={{ height: '100vh', borderRight: 0 }}
+                    items={menuItems}
+                /> */}
+                <SideBarMenu />
+            </Sider>
             <Content style={{ padding: '20px' }}>
                 <div className="exam-list-container">
                     <h1>Danh sách đề thi</h1>

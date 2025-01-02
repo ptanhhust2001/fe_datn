@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { List, Input, Button, message } from 'antd';
+import { List, Input, Button, message, Avatar, Row, Col, Tabs } from 'antd';
+import { SmileOutlined, PictureOutlined, QuestionCircleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import './PostDetail.css';
 
 const { TextArea } = Input;
+const { TabPane } = Tabs;
 
 const PostDetail = () => {
     const { id } = useParams();
@@ -87,6 +89,14 @@ const PostDetail = () => {
     return (
         <div className="post-detail-page">
             <div className="post-detail-container">
+            <Button
+                type="default"
+                icon={<ArrowLeftOutlined />}
+                onClick={() => navigate('/home')}
+                style={{ marginBottom: '20px' }}
+            >
+                Quay lại Trang chủ
+            </Button>
                 {post.imageFilePath && (
                     <div className="post-banner">
                         <img src={post.imageFilePath} alt={post.title} className="banner-image" />
@@ -106,7 +116,6 @@ const PostDetail = () => {
                     <p><strong>Lớp học:</strong> {post.classEntityName}</p>
                 </div>
 
-                {/* Hiển thị danh sách tài liệu */}
                 {post.materials && post.materials.length > 0 && (
                     <div className="materials-section">
                         <h3>Tài liệu</h3>
@@ -126,33 +135,54 @@ const PostDetail = () => {
 
                 <div className="comments-section">
                     <h3>Bình luận</h3>
-
                     <List
                         dataSource={comments}
                         renderItem={(comment) => (
                             <List.Item key={comment.id}>
                                 <div>
-                                    <p><strong>{comment.createBy}</strong> ({new Date(comment.createAt).toLocaleString()}):</p>
+                                    <p>
+                                        <strong>{comment.createBy}</strong> ({new Date(comment.createAt).toLocaleString()}):
+                                    </p>
                                     <p>{comment.content}</p>
                                 </div>
                             </List.Item>
                         )}
                     />
 
-                    <div className="add-comment">
-                        <TextArea
-                            rows={4}
-                            value={newComment}
-                            onChange={(e) => setNewComment(e.target.value)}
-                            placeholder="Nhập bình luận của bạn..."
-                        />
-                        <Button type="primary" onClick={handleAddComment} style={{ marginTop: '10px' }}>
-                            Thêm bình luận
-                        </Button>
+                    <div className="add-comment" style={{ marginTop: '20px', border: '1px solid #d9d9d9', borderRadius: '5px', padding: '10px' }}>
+                        <Tabs defaultActiveKey="1">
+                            <TabPane tab="Viết" key="1">
+                                <TextArea
+                                    rows={4}
+                                    value={newComment}
+                                    onChange={(e) => setNewComment(e.target.value)}
+                                    placeholder="Viết bình luận..."
+                                    style={{ marginBottom: '10px' }}
+                                />
+                            </TabPane>
+                            <TabPane tab="Xem trước" key="2">
+                                <div style={{ border: '1px solid #f0f0f0', padding: '10px', borderRadius: '5px' }}>
+                                    {newComment || 'Nội dung xem trước bình luận của bạn...'}
+                                </div>
+                            </TabPane>
+                        </Tabs>
+                        <Row justify="space-between" align="middle" style={{ marginTop: '10px' }}>
+                            <Col>
+                                <Button type="text" style={{ color: '#888' }} onClick={() => setNewComment('')}>
+                                    Hủy
+                                </Button>
+                                <Button
+                                    type="primary"
+                                    onClick={handleAddComment}
+                                    disabled={!newComment.trim()}
+                                    style={{ marginLeft: '10px' }}
+                                >
+                                    Trả lời
+                                </Button>
+                            </Col>
+                        </Row>
                     </div>
                 </div>
-
-                <button className="back-btn" onClick={() => navigate('/home')}>Quay lại danh sách bài viết</button>
             </div>
         </div>
     );

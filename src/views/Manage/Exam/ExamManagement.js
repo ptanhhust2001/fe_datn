@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, message, Modal } from 'antd';
+import { Layout, Table, Button, message, Modal } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import SideBarMenu from '../../Home/SideBarMenu';
 import './ExamManagement.css';
+
+const { Content } = Layout;
 
 const ExamManagement = () => {
     const [exams, setExams] = useState([]);
@@ -112,29 +115,34 @@ const ExamManagement = () => {
     ];
 
     return (
-        <div className="exam-management">
-            <h2>Bài thi của tôi</h2>
-            <Table
-                dataSource={exams}
-                columns={columns}
-                rowKey="id"
-                loading={loading}
-                pagination={{ pageSize: 10 }}
-                bordered
-            />
+        <Layout style={{ minHeight: '100vh' }}>
+            <SideBarMenu />
+            <Content style={{ padding: '20px' }}>
+                <div className="exam-management">
+                    <h2>Bài thi của tôi</h2>
+                    <Table
+                        dataSource={exams}
+                        columns={columns}
+                        rowKey="id"
+                        loading={loading}
+                        pagination={{ pageSize: 10 }}
+                        bordered
+                    />
 
-            <Modal
-                title="Xác nhận xóa"
-                open={isModalVisible}
-                onOk={handleDelete}
-                onCancel={() => setIsModalVisible(false)}
-                okText="Xóa"
-                cancelText="Hủy"
-                okButtonProps={{ danger: true }}
-            >
-                <p>Bạn có chắc chắn muốn xóa bài thi này không?</p>
-            </Modal>
-        </div>
+                    <Modal
+                        title="Xác nhận xóa"
+                        open={isModalVisible}
+                        onOk={handleDelete}
+                        onCancel={() => setIsModalVisible(false)}
+                        okText="Xóa"
+                        cancelText="Hủy"
+                        okButtonProps={{ danger: true }}
+                    >
+                        <p>Bạn có chắc chắn muốn xóa bài thi này không?</p>
+                    </Modal>
+                </div>
+            </Content>
+        </Layout>
     );
 };
 

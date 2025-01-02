@@ -9,6 +9,7 @@ const HeaderComponent = () => {
     const [userInfo, setUserInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isPostModalVisible, setIsPostModalVisible] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -46,11 +47,19 @@ const HeaderComponent = () => {
         fetchUserInfo();
     }, [location]);
 
-    const showModal = () => {
+    const showPostModal = () => {
+        setIsPostModalVisible(true);
+    };
+
+    const handlePostModalCancel = () => {
+        setIsPostModalVisible(false);
+    };
+
+    const showExamModal = () => {
         setIsModalVisible(true);
     };
 
-    const handleCancel = () => {
+    const handleExamModalCancel = () => {
         setIsModalVisible(false);
     };
 
@@ -72,16 +81,17 @@ const HeaderComponent = () => {
             </div>
 
             {/* Nút tạo bài viết */}
-            {userInfo?.roles.some(role => ['ADMIN', 'MANAGE'].includes(role.name)) && (
+            {userInfo && (
                 <div className="create-post-button">
-                    <Link to="/create-post">
-                        <Button className="btn-create-post" icon={<PlusOutlined />}>
-                            Tạo Bài Viết
-                        </Button>
-                    </Link>
+                    <Button
+                        className="btn-create-post"
+                        icon={<PlusOutlined />}
+                        onClick={showPostModal}
+                    >
+                        Tạo Bài Viết
+                    </Button>
                 </div>
             )}
-
 
             {/* Nút thi thử */}
             <div className="exam-button">
@@ -97,7 +107,7 @@ const HeaderComponent = () => {
                 <Button
                     className="btn-create-exam"
                     icon={<PlusOutlined />}
-                    onClick={showModal}
+                    onClick={showExamModal}
                 >
                     Tạo Bài Thi
                 </Button>
@@ -111,13 +121,7 @@ const HeaderComponent = () => {
                             <Menu>
                                 {userInfo.roles.some(role => role.name === 'ADMIN') && (
                                     <>
-                                        <Menu.Item
-                                            key="manage-posts"
-                                            icon={<EditOutlined />}
-                                            onClick={() => navigate('/manage-posts')}
-                                        >
-                                            Quản lý bài viết
-                                        </Menu.Item>
+                    
                                         <Menu.Item
                                             key="manage-users"
                                             icon={<TeamOutlined />}
@@ -125,19 +129,27 @@ const HeaderComponent = () => {
                                         >
                                             Quản lý người dùng
                                         </Menu.Item>
-                                        <Menu.Item
-                                            key="my-exams"
-                                            icon={<BarsOutlined />}
-                                            onClick={() => navigate('/exam-management')}
 
-                                        >
-                                            Bài thi của tôi
-                                        </Menu.Item>
                                     </>
                                 )}
                                 <Menu.Item key="profile" icon={<UserOutlined />} onClick={() => navigate('/profile')}>
                                     Thông tin cá nhân
                                 </Menu.Item>
+                                <Menu.Item
+                                            key="manage-posts"
+                                            icon={<EditOutlined />}
+                                            onClick={() => navigate('/manage-posts')}
+                                        >
+                                            Quản lý bài viết
+                                    </Menu.Item>
+                                    <Menu.Item
+                                        key="my-exams"
+                                        icon={<BarsOutlined />}
+                                        onClick={() => navigate('/exam-management')}
+
+                                    >
+                                        Bài thi của tôi
+                                    </Menu.Item>
                                 <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
                                     Đăng xuất
                                 </Menu.Item>
@@ -170,7 +182,7 @@ const HeaderComponent = () => {
                 title="Tạo đề thi mới"
                 open={isModalVisible}
                 footer={null}
-                onCancel={handleCancel}
+                onCancel={handleExamModalCancel}
                 centered
             >
                 <Row gutter={[16, 16]} justify="center">
@@ -206,6 +218,50 @@ const HeaderComponent = () => {
                             </div>
                         </Card>
 
+                    </Col>
+                </Row>
+            </Modal>
+
+            {/* Modal Tạo bài viết */}
+            <Modal
+                title="Tạo bài viết mới"
+                open={isPostModalVisible}
+                footer={null}
+                onCancel={handlePostModalCancel}
+                centered
+            >
+                <Row gutter={[16, 16]} justify="center">
+                    {userInfo?.roles.some(role => ['ADMIN', 'MANAGE'].includes(role.name)) && (
+                        <Col span={16}>
+                            <Card
+                                hoverable
+                                className="post-card"
+                                onClick={() => {
+                                    setIsPostModalVisible(false);
+                                    navigate('/create-post');
+                                }}
+                            >
+                                <div className="post-card-content">
+                                    <h3>Bài viết hệ thống</h3>
+                                    <p>Chỉ dành cho quản trị viên</p>
+                                </div>
+                            </Card>
+                        </Col>
+                    )}
+                    <Col span={16}>
+                        <Card
+                            hoverable
+                            className="post-card"
+                            onClick={() => {
+                                setIsPostModalVisible(false);
+                                navigate('/create-post-forum');
+                            }}
+                        >
+                            <div className="post-card-content">
+                                <h3>Bài viết diễn đàn</h3>
+                                <p>Dành cho tất cả người dùng</p>
+                            </div>
+                        </Card>
                     </Col>
                 </Row>
             </Modal>

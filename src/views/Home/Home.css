@@ -134,3 +134,44 @@ html {
 .sidebar-section {
     margin-bottom: 20px;
 }
+
+
+/* Sidebar bên trái */
+.ant-menu {
+    background-color: #fff; /* Màu nền trắng */
+    border-right: 1px solid #f0f0f0; /* Đường viền ngăn cách */
+    height: 100vh; /* Chiều cao 100% viewport */
+    padding: 20px 0; /* Khoảng cách bên trong */
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1); /* Hiệu ứng bóng */
+}
+
+.ant-menu-item {
+    font-size: 16px; /* Kích thước font */
+    padding: 10px 20px; /* Khoảng cách bên trong item */
+    margin: 5px 0; /* Khoảng cách giữa các item */
+    color: #333; /* Màu chữ */
+    border-radius: 4px; /* Bo góc */
+    transition: all 0.3s ease; /* Hiệu ứng chuyển đổi khi hover */
+}
+
+.ant-menu-item:hover {
+    background-color: #f0f0f0; /* Màu nền khi hover */
+    color: #007bff; /* Màu chữ khi hover */
+}
+
+.ant-menu-item-selected {
+    background-color: #e6f7ff; /* Màu nền khi được chọn */
+    color: #1890ff; /* Màu chữ khi được chọn */
+    font-weight: bold; /* Chữ đậm hơn */
+}
+
+.ant-menu-item-icon {
+    margin-right: 10px; /* Khoảng cách giữa icon và text */
+    font-size: 18px; /* Kích thước icon */
+    color: inherit; /* Lấy màu từ item */
+}
+
+/* Hiệu chỉnh layout */
+.ant-menu-vertical {
+    width: 100%; /* Chiều rộng full */
+}

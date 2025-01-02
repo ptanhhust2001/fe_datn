@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Table, Button, Input, Space, message, Popconfirm, Spin } from 'antd';
+import { Table, Button, Input, Space, message, Popconfirm, Spin, Tabs } from 'antd';
 import { SearchOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 
 const ManagePosts = () => {
     const [userId, setUserId] = useState(null); // Lưu trữ userId
+    const [userRoles, setUserRoles] = useState([]); // Lưu trữ vai trò người dùng
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchValue, setSearchValue] = useState('');
     const [filteredPosts, setFilteredPosts] = useState([]);
+    const [activeTab, setActiveTab] = useState('community'); // Tab hiện tại mặc định là community
     const navigate = useNavigate();
 
     // Gọi API lấy thông tin người dùng
@@ -32,11 +34,14 @@ const ManagePosts = () => {
             const data = response.data.result;
 
             // Kiểm tra vai trò của người dùng
-            const userRoles = data.roles.map((role) => role.name);
-            if (!userRoles.includes('ADMIN') && !userRoles.includes('MANAGER')) {
-                message.error('Bạn không có quyền truy cập');
-                navigate('/unauthorized'); // Chuyển hướng đến trang không có quyền truy cập
-                return;
+            const roles = data.roles.map((role) => role.name);
+            setUserRoles(roles);
+
+            if (!roles.includes('ADMIN') && !roles.includes('MANAGER')) {
+                if (activeTab === 'internal') {
+                    message.error('Bạn không có quyền truy cập bài viết hệ thống');
+                    setActiveTab('community'); // Chuyển sang tab bài viết diễn đàn
+                }
             }
 
             setUserId(data.id); // Lưu userId từ kết quả trả về
@@ -47,14 +52,17 @@ const ManagePosts = () => {
         }
     };
 
-
     // Gọi API lấy danh sách bài viết
-    const fetchPosts = async () => {
+    const fetchPosts = async (type) => {
         if (!userId) return; // Chờ userId được tải về
 
         setLoading(true);
         try {
-            const response = await axios.get('http://localhost:8080/books/posts', {
+            const apiUrl = type === 'internal'
+                ? 'http://localhost:8080/books/posts/internal'
+                : 'http://localhost:8080/books/posts/community';
+
+            const response = await axios.get(apiUrl, {
                 params: {
                     advanceSearch: `user.id＝${userId}`, // Tìm kiếm bài viết của user hiện tại
                     page: 0,
@@ -82,7 +90,7 @@ const ManagePosts = () => {
                 params: { ids: postId }
             });
             message.success('Xóa bài viết thành công');
-            fetchPosts(); // Tải lại danh sách bài viết sau khi xóa
+            fetchPosts(activeTab); // Tải lại danh sách bài viết sau khi xóa
         } catch (error) {
             message.error('Lỗi khi xóa bài viết');
         }
@@ -108,8 +116,8 @@ const ManagePosts = () => {
     }, []);
 
     useEffect(() => {
-        fetchPosts();
-    }, [userId]); // Gọi fetchPosts sau khi userId được cập nhật
+        fetchPosts(activeTab);
+    }, [userId, activeTab]); // Gọi fetchPosts sau khi userId hoặc tab thay đổi
 
     // Cấu hình cột cho bảng
     const columns = [
@@ -173,6 +181,24 @@ const ManagePosts = () => {
     return (
         <div style={{ padding: '20px' }}>
             <h1>Quản lý bài viết</h1>
+
+            <Tabs
+                activeKey={activeTab}
+                onChange={(key) => {
+                    if (key === 'internal' && !userRoles.includes('ADMIN') && !userRoles.includes('MANAGER')) {
+                        message.error('Bạn không có quyền truy cập bài viết hệ thống');
+                        return;
+                    }
+                    setActiveTab(key);
+                }}
+                style={{ marginBottom: 16 }}
+            >
+                {userRoles.includes('ADMIN') || userRoles.includes('MANAGER') ? (
+                    <Tabs.TabPane tab="Bài viết hệ thống" key="internal" />
+                ) : null}
+                <Tabs.TabPane tab="Bài viết diễn đàn" key="community" />
+            </Tabs>
+
             <Space style={{ marginBottom: 16 }}>
                 <Input
                     placeholder="Tìm kiếm bài viết"

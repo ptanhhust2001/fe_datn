@@ -20,6 +20,8 @@ import CustomFooter from './Home/CustomFooter';
 import CreateExamAI from './Exam/CreateExamAI';
 import ExamManagement from './Manage/Exam/ExamManagement';
 import CreateExamByText from './Exam/CreateExamByText';
+import Forum from './forum/Forum';
+import CreatePostForum from './forum/CreatePostForum';
 
 function App() {
   const [routeKey, setRouteKey] = useState(Date.now());
@@ -45,6 +47,8 @@ function App() {
           <Route path="/create-exam-ai" element={<CreateExamAI />} />
           <Route path="/exam-management" element={<ExamManagement />} />
           <Route path="/create-exam-by-text" element={<CreateExamByText />} />
+          <Route path="/create-post-forum" element={<CreatePostForum />} />
+          <Route path="/forum" element={<Forum />} />
         </Routes>
       </div>
       <CustomFooter />
