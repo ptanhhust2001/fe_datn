@@ -89,14 +89,14 @@ const PostDetail = () => {
     return (
         <div className="post-detail-page">
             <div className="post-detail-container">
-            <Button
-                type="default"
-                icon={<ArrowLeftOutlined />}
-                onClick={() => navigate('/home')}
-                style={{ marginBottom: '20px' }}
-            >
-                Quay lại Trang chủ
-            </Button>
+                <Button
+                    type="default"
+                    icon={<ArrowLeftOutlined />}
+                    onClick={() => navigate('/home')}
+                    style={{ marginBottom: '20px' }}
+                >
+                    Quay lại Trang chủ
+                </Button>
                 {post.imageFilePath && (
                     <div className="post-banner">
                         <img src={post.imageFilePath} alt={post.title} className="banner-image" />
@@ -113,7 +113,7 @@ const PostDetail = () => {
 
                 <div className="post-meta">
                     <p><strong>Môn học:</strong> {post.subjectName}</p>
-                    <p><strong>Lớp học:</strong> {post.classEntityName}</p>
+                    <p><strong>lớp/khoa/viện:</strong> {post.classEntityName}</p>
                 </div>
 
                 {post.materials && post.materials.length > 0 && (

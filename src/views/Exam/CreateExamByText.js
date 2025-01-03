@@ -28,7 +28,7 @@ const CreateExamByText = () => {
                 });
                 setSubjects(subjectsResponse.data.value);
             } catch (error) {
-                message.error('Lỗi khi tải danh sách lớp hoặc môn học.');
+                message.error('Lỗi khi tải danh sách lớp/khoa/viện hoặc môn học.');
             }
         };
 
@@ -93,10 +93,10 @@ const CreateExamByText = () => {
                         >
                             <Form.Item
                                 name="classId"
-                                label="Lớp học"
-                                rules={[{ required: true, message: 'Vui lòng chọn lớp học!' }]}
+                                label="lớp/khoa/viện"
+                                rules={[{ required: true, message: 'Vui lòng chọn lớp/khoa/viện!' }]}
                             >
-                                <Select placeholder="Chọn lớp học">
+                                <Select placeholder="Chọn lớp/khoa/viện học">
                                     {classes.map((cls) => (
                                         <Option key={cls.id} value={cls.id}>
                                             {cls.name}
@@ -155,7 +155,7 @@ const CreateExamByText = () => {
                         <h4 style={{ marginBottom: '16px', fontWeight: 'bold' }}>Hướng dẫn tạo bài thi:</h4>
                         <ul style={{ paddingLeft: '20px', lineHeight: '1.6' }}>
                             <li>
-                                <b>Chọn lớp học</b> và <b>môn học</b> tương ứng từ danh sách.
+                                <b>Chọn lớp/khoa/viện</b> và <b>môn học</b> tương ứng từ danh sách.
                             </li>
                             <li>
                                 Tải lên file đề thi của bạn (hỗ trợ định dạng <b>Word</b>).

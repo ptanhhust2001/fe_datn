@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Layout, Table, Button, Modal, Form, Input, Spin, message, Popconfirm } from 'antd';
+import { Layout, Table, Button, Modal, Form, Input, Spin, message, Popconfirm, DatePicker } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import moment from 'moment';
 
 const { Content } = Layout;
 
@@ -40,9 +41,11 @@ const Admin = () => {
         setEditingUser(user);
         if (user) {
             form.setFieldsValue({
+                username: user.username,
+                password: '', // Mật khẩu sẽ không được hiển thị khi chỉnh sửa
                 firstName: user.firstName,
                 lastName: user.lastName,
-                dob: user.dob,
+                dob: moment(user.dob), // Chuyển đổi sang Moment
             });
         } else {
             form.resetFields();
@@ -70,15 +73,18 @@ const Admin = () => {
 
     const handleSave = async (values) => {
         try {
+            const payload = {
+                ...values,
+                dob: values.dob.format('YYYY-MM-DD'), // Định dạng ngày
+            };
             if (editingUser) {
-                // Sửa người dùng (chỉ sửa firstName, lastName, dob)
-                await axios.put(`http://localhost:8080/books/users/${editingUser.id}`, values, {
+                await axios.put(`http://localhost:8080/books/users/${editingUser.id}`, payload, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 message.success('Cập nhật người dùng thành công!');
-                setUsers(users.map(user => (user.id === editingUser.id ? { ...user, ...values } : user)));
+                setUsers(users.map(user => (user.id === editingUser.id ? { ...user, ...payload } : user)));
             } else {
-                const response = await axios.post('http://localhost:8080/books/users', values, {
+                const response = await axios.post('http://localhost:8080/books/users', payload, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 message.success('Thêm người dùng thành công!');
@@ -155,7 +161,22 @@ const Admin = () => {
                     footer={null}
                 >
                     <Form form={form} onFinish={handleSave}>
-                        {/* Chỉ cho phép sửa các trường firstName, lastName, dob */}
+                        <Form.Item
+                            label="Tên người dùng"
+                            name="username"
+                            rules={[{ required: true, message: 'Vui lòng nhập tên người dùng!' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                        {!editingUser && (
+                            <Form.Item
+                                label="Mật khẩu"
+                                name="password"
+                                rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+                            >
+                                <Input.Password />
+                            </Form.Item>
+                        )}
                         <Form.Item
                             label="Họ"
                             name="firstName"
@@ -173,13 +194,13 @@ const Admin = () => {
                         <Form.Item
                             label="Ngày sinh"
                             name="dob"
-                            rules={[{ required: true, message: 'Vui lòng nhập ngày sinh!' }]}
+                            rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}
                         >
-                            <Input />
+                            <DatePicker style={{ width: '100%' }} format="YYYY-MM-DD" />
                         </Form.Item>
                         <Form.Item>
                             <Button type="primary" htmlType="submit">
-                                Lưu
+                                {editingUser ? 'Cập nhật' : 'Thêm'}
                             </Button>
                         </Form.Item>
                     </Form>

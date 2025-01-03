@@ -25,8 +25,9 @@ const Login = () => {
             } else {
                 message.error('Đăng nhập thất bại. Tên người dùng hoặc mật khẩu không chính xác.');
             }
+
         } catch (error) {
-            message.error('Lỗi mạng hoặc hệ thống. Vui lòng thử lại sau.');
+            message.error('Đăng nhập thất bại. Tên người dùng hoặc mật khẩu không chính xác.');
             console.error(error);
         } finally {
             setLoading(false);

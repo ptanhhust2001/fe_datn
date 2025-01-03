@@ -1,14 +1,6 @@
 import React, { useState } from 'react';
 import { Layout, Menu } from 'antd';
-import {
-    HomeOutlined,
-    FileTextOutlined,
-    CommentOutlined,
-    SettingOutlined,
-    BookOutlined,
-    CrownOutlined,
-    AppstoreOutlined,
-} from '@ant-design/icons';
+import { HomeOutlined, FileTextOutlined, CommentOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import './SidebarMenu.css';
 
@@ -16,7 +8,7 @@ const { Sider } = Layout;
 
 const SideBarMenu = () => {
     const navigate = useNavigate();
-    const [selectedKey, setSelectedKey] = useState('exam');
+    const [selectedKey, setSelectedKey] = useState('home');
 
     const handleMenuClick = (key, path) => {
         setSelectedKey(key);
@@ -44,27 +36,6 @@ const SideBarMenu = () => {
         },
     ];
 
-    const managementItems = [
-        {
-            key: 'class',
-            icon: <BookOutlined />,
-            label: 'Lớp học tập',
-            onClick: () => handleMenuClick('class', '/classes'),
-        },
-        {
-            key: 'exam-management',
-            icon: <HomeOutlined />,
-            label: 'Quản lý bài thi',
-            onClick: () => handleMenuClick('exam-management', '/exam-management'),
-        },
-        {
-            key: 'service',
-            icon: <CrownOutlined />,
-            label: 'Gói dịch vụ',
-            onClick: () => handleMenuClick('service', '/services'),
-        },
-    ];
-
     return (
         <Sider
             width={200}
@@ -80,18 +51,6 @@ const SideBarMenu = () => {
                         {item.label}
                     </Menu.Item>
                 ))}
-
-                <Menu.SubMenu key="management" icon={<AppstoreOutlined />} title="Quản lý">
-                    {managementItems.map(item => (
-                        <Menu.Item key={item.key} icon={item.icon} onClick={item.onClick}>
-                            {item.label}
-                        </Menu.Item>
-                    ))}
-                </Menu.SubMenu>
-
-                <Menu.Item key="settings" icon={<SettingOutlined />} onClick={() => handleMenuClick('settings', '/settings')}>
-                    Cài đặt
-                </Menu.Item>
             </Menu>
         </Sider>
     );

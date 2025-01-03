@@ -153,7 +153,7 @@ const ExamList = () => {
                         <Form.Item name="classId" label="Lớp">
                             <Select
                                 style={{ width: 120 }}
-                                placeholder="Chọn lớp"
+                                placeholder="Chọn lớp/khoa/viện"
                                 onChange={handleClassChange}
                                 allowClear
                             >
@@ -198,7 +198,7 @@ const ExamList = () => {
                     >
                         <Table.Column title="ID" dataIndex="id" key="id" />
                         <Table.Column title="Tên đề thi" dataIndex="name" key="name" />
-                        <Table.Column title="Lớp" dataIndex="classEntityName" key="classEntityName" />
+                        <Table.Column title="lớp/khoa/viện" dataIndex="classEntityName" key="classEntityName" />
                         <Table.Column title="Môn học" dataIndex="subjectName" key="subjectName" />
                         <Table.Column title="Người tạo" dataIndex="createBy" key="createBy" />
                         <Table.Column

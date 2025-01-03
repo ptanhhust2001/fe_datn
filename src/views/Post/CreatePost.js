@@ -47,7 +47,7 @@ const CreatePost = () => {
                 });
                 setClasses(response.data.value);
             } catch (error) {
-                console.error('Lỗi khi lấy danh sách lớp học:', error);
+                console.error('Lỗi khi lấy danh sách lớp/khoa/viện:', error);
             }
         };
 
@@ -246,10 +246,10 @@ const CreatePost = () => {
 
                 <Form.Item
                     name="classEntityId"
-                    label="Lớp học"
-                    rules={[{ required: true, message: 'Vui lòng chọn lớp học!' }]}
+                    label="lớp/khoa/viện"
+                    rules={[{ required: true, message: 'Vui lòng chọn lớp/khoa/viện!' }]}
                 >
-                    <Select placeholder="Chọn lớp học">
+                    <Select placeholder="Chọn lớp/khoa/viện">
                         {classes.map((cls) => (
                             <Option key={cls.id} value={cls.id}>
                                 {cls.name}

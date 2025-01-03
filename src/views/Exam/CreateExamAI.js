@@ -91,10 +91,10 @@ const CreateExamAI = () => {
 
                 <Form.Item
                     name="classEntityId"
-                    label="Chọn lớp học"
-                    rules={[{ required: true, message: "Vui lòng chọn lớp học!" }]}
+                    label="Chọn lớp/khoa/viện"
+                    rules={[{ required: true, message: "Vui lòng chọn lớp/khoa/viện!" }]}
                 >
-                    <Select placeholder="Chọn lớp học">
+                    <Select placeholder="Chọn lớp/khoa/viện">
                         {classes.map((cls) => (
                             <Option key={cls.id} value={cls.id}>
                                 {cls.name}
